@@ -1,10 +1,10 @@
 /*********************************************
-Kod stanowi uzupe�nienie materia��w do �wicze�
+Kod stanowi uzupe³nienie materia³ów do æwiczeñ
 w ramach przedmiotu metody optymalizacji.
-Kod udost�pniony na licencji CC BY-SA 3.0
-Autor: dr in�. �ukasz Sztangret
+Kod udostêpniony na licencji CC BY-SA 3.0
+Autor: dr in¿. £ukasz Sztangret
 Katedra Informatyki Stosowanej i Modelowania
-Akademia G�rniczo-Hutnicza
+Akademia Górniczo-Hutnicza
 Data ostatniej modyfikacji: 30.09.2025
 *********************************************/
 
@@ -22,7 +22,7 @@ int main()
 {
 	try
 	{
-		lab0();
+		lab1();
 	}
 	catch (string EX_INFO)
 	{
@@ -35,53 +35,55 @@ int main()
 void lab0()
 {
 	//Funkcja testowa
-	double epsilon = 1e-2;									// dok�adno��
-	int Nmax = 10000;										// maksymalna liczba wywo�a� funkcji celu
-	matrix lb(2, 1, -5), ub(2, 1, 5),						// dolne oraz g�rne ograniczenie
-		a(2, 1);											// dok�adne rozwi�zanie optymalne
-	solution opt;											// rozwi�zanie optymalne znalezione przez algorytm
+	double epsilon = 1e-2;									// dok³adnoœæ
+	int Nmax = 10000;										// maksymalna liczba wywo³añ funkcji celu
+	matrix lb(-100), ub(100),						// dolne oraz górne ograniczenie
+		a(2, 1);											// dok³adne rozwi¹zanie optymalne
+	solution opt;											// rozwi¹zanie optymalne znalezione przez algorytm
 	a(0) = -1;
 	a(1) = 2;
-	opt = MC(ff0T, 2, lb, ub, epsilon, Nmax, a);			// wywo�anie procedury optymalizacji
+	opt = MC(ff0T, 2, lb, ub, epsilon, Nmax, a);			// wywo³anie procedury optymalizacji
 	cout << opt << endl << endl;							// wypisanie wyniku
-	solution::clear_calls();								// wyzerowanie licznik�w
+	solution::clear_calls();								// wyzerowanie liczników
 
 	//Wahadlo
-	Nmax = 1000;											// dok�adno��
-	epsilon = 1e-2;											// maksymalna liczba wywo�a� funkcji celu
-	lb = 0, ub = 5;											// dolne oraz g�rne ograniczenie
-	double teta_opt = 1;									// maksymalne wychylenie wahad�a
-	opt = MC(ff0R, 1, lb, ub, epsilon, Nmax, teta_opt);		// wywo�anie procedury optymalizacji
+	Nmax = 1000;											// dok³adnoœæ
+	epsilon = 1e-2;											// maksymalna liczba wywo³añ funkcji celu
+	lb = 0, ub = 5;											// dolne oraz górne ograniczenie
+	double teta_opt = 1;									// maksymalne wychylenie wahad³a
+	opt = MC(ff0R, 1, lb, ub, epsilon, Nmax, teta_opt);		// wywo³anie procedury optymalizacji
 	cout << opt << endl << endl;							// wypisanie wyniku
-	solution::clear_calls();								// wyzerowanie licznik�w
+	solution::clear_calls();								// wyzerowanie liczników
 
 	//Zapis symulacji do pliku csv
-	matrix Y0 = matrix(2, 1),								// Y0 zawiera warunki pocz�tkowe
-		MT = matrix(2, new double[2] { m2d(opt.x), 0.5 });	// MT zawiera moment si�y dzia�aj�cy na wahad�o oraz czas dzia�ania
-	matrix* Y = solve_ode(df0, 0, 0.1, 10, Y0, NAN, MT);	// rozwi�zujemy r�wnanie r�niczkowe
-	ofstream Sout("/data/symulacja_lab0.csv");					// definiujemy strumie� do pliku .csv
+	matrix Y0 = matrix(2, 1),								// Y0 zawiera warunki pocz¹tkowe
+		MT = matrix(2, new double[2] { m2d(opt.x), 0.5 });	// MT zawiera moment si³y dzia³aj¹cy na wahad³o oraz czas dzia³ania
+	matrix* Y = solve_ode(df0, 0, 0.1, 10, Y0, NAN, MT);	// rozwi¹zujemy równanie ró¿niczkowe
+	ofstream Sout("symulacja_lab0.csv");					// definiujemy strumieñ do pliku .csv
 	Sout << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
-	Sout.close();											// zamykamy strumie�
-	Y[0].~matrix();											// usuwamy z pami�ci rozwi�zanie RR
+	Sout.close();											// zamykamy strumieñ
+	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
 	Y[1].~matrix();
 }
 
-void lab1() // Daje zły wynik
+void lab1()
 {
-       // Parametry testu
-        double a = 0;            // początek przedziału
-        double b = 2;            // koniec przedziału
-        double epsilon = 1e-4;   // dokładność
-        matrix ud1(1, 1), ud2(1, 1); // dane dodatkowe dla funkcji celu, jeśli potrzebne
-
-        // Wywołanie algorytmu Fibonacciego
-        solution opt = fib(ff1T, a, b, epsilon, ud1, ud2);
-
-        // Wypisanie wyniku
-        cout << "Rozwiazanie znalezione przez Fibonacci: " << endl;
-        cout << opt << endl;
-        solution::clear_calls(); // zerowanie licznika wywołań 
-
+	//Funkcja testowa
+	double epsilon = 1e-2;
+	double gamma = 1e-6;
+	int Nmax = 10000;
+	matrix lb(-100), ub(100);
+	double* p = new double[2];
+	p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
+	//cout << p[0] << endl;
+	//cout << p[1] << endl;					// dolne oraz górne ograniczeni							// dok³adne rozwi¹zanie optymalne
+	solution opt;		// rozwi¹zanie optymalne znalezione przez algorytm
+	opt = fib(ff1T, p[0],p[1], epsilon, lb, ub);			// wywo³anie procedury optymalizacji
+	cout << opt << endl << endl;
+	solution opt1;		// rozwi¹zanie optymalne znalezione przez algorytm
+	opt1 = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax, lb, ub);			// wywo³anie procedury optymalizacji
+	cout << opt1 << endl << endl;// wypisanie wyniku
+	solution::clear_calls();
 }
 
 void lab2()
