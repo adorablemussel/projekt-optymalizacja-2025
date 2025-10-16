@@ -22,6 +22,7 @@ int main()
 {
 	try
 	{
+		//lab0();
 		lab1();
 	}
 	catch (string EX_INFO)
@@ -37,7 +38,7 @@ void lab0()
 	//Funkcja testowa
 	double epsilon = 1e-2;									// dok³adnoœæ
 	int Nmax = 10000;										// maksymalna liczba wywo³añ funkcji celu
-	matrix lb(-100), ub(100),						// dolne oraz górne ograniczenie
+	matrix lb(2, 1, -5), ub(2, 1, 5),						// dolne oraz górne ograniczenie
 		a(2, 1);											// dok³adne rozwi¹zanie optymalne
 	solution opt;											// rozwi¹zanie optymalne znalezione przez algorytm
 	a(0) = -1;
@@ -84,6 +85,10 @@ void lab1()
 	opt1 = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax, lb, ub);			// wywo³anie procedury optymalizacji
 	cout << opt1 << endl << endl;// wypisanie wyniku
 	solution::clear_calls();
+	solution opt2;
+	opt2 = fib(ff1R, 1.0, 100.0, epsilon, 50);
+	//opt2 = lag(ff1R, 1.0, 100.0, epsilon, gamma, Nmax, 50);
+	cout << opt2 << endl << endl;
 }
 
 void lab2()

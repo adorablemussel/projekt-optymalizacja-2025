@@ -31,6 +31,53 @@ matrix ff1T(matrix x, matrix ud1, matrix ud2)
 	return y;
 }
 
+matrix ff1R(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+	matrix Y0(3,1);
+	Y0(0)=5.0;	//objętość zbiornika a
+	Y0(1)=1.0;	//objętość zbiornika b
+	Y0(2)=20.0;	//temperatura zbiornika b
+	matrix ud2_local(1,1);
+	ud2_local(0)=x(0);
+	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2_local);
+	int n = get_len(Y[0]);
+	double maxT_B = Y[2](0,0);
+	for(int i=1;i<n;i++)
+	{
+		if(m2d(Y[2](i,0))>maxT_B)
+		{
+			maxT_B=m2d(Y[2](i,0));
+		}
+	}
+	y=abs(maxT_B - m2d(ud1));
+	Y[0].~matrix();											
+	Y[1].~matrix();
+	Y[2].~matrix();
+	
+	return y;
+}
+
+matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
+{
+	matrix dY(3,1);
+	double a = 0.98, b = 0.63, g = 9.81; // zmiana objętości wody w zbiorniku
+	double pa = 2, ta = 95; // zbiornik a
+	double pb = 1; // zbiornik b
+	double tin = 20, vin = 0.01; // wlewanie do zbiornika b F in = 10 litrów/s
+	double db = 36.5665; // przekrój otwóru wylewającej się wody
+	db=db*1e-4;
+	double da=ud2(0) * 1e-4;
+	double V_A=Y(0);
+	double V_B=Y(1);
+	double T_B=Y(2);
+	dY(0) = -a * b * da * sqrt(2*g*(V_A/pa));
+	dY(1) = -a * b * db * sqrt(2*g*(V_B/pb)) + dY(0) + vin;
+	dY(2) = (dY(0)/V_B) * (ta - T_B) + (vin/V_B) * (tin - T_B);
+
+	return dY;
+}
+
 matrix df0(double t, matrix Y, matrix ud1, matrix ud2)
 {
 	matrix dY(2, 1);										// definiujemy wektor pochodnych szukanych funkcji

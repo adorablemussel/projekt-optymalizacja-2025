@@ -105,6 +105,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
+		cout<<"jestem w fibonacim"<<endl;
 		//Tu wpisz kod funkcji
 		//std::cout << std::setprecision(8);
 		std::vector<int> phi = { 1,1 };
