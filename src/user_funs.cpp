@@ -38,17 +38,15 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 	Y0(0)=5.0;	//objętość zbiornika a
 	Y0(1)=1.0;	//objętość zbiornika b
 	Y0(2)=20.0;	//temperatura zbiornika b
-	matrix ud2_local(1,1);
-	ud2_local(0)=x(0);
-	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2_local);
+	ud1(0) = m2d(x);
+	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
 	int n = get_len(Y[0]);
-	//cout<<*get_size(*Y)<<endl;
-	double maxT_B = Y[1](0,0);
+	double maxT_B = Y[1](0,2);
 	for(int i=1;i<n;i++)
 	{
-		if(m2d(Y[1](i,0))>maxT_B)
+		if(Y[1](i,2)>maxT_B)
 		{
-			maxT_B=m2d(Y[1](i,0));
+			maxT_B=Y[1](i,2);			
 		}
 	}
 	y=abs(maxT_B - m2d(ud1));
@@ -60,19 +58,29 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
 {
 	matrix dY(3,1);
-	double a = 0.98, b = 0.63, g = 9.81; // zmiana objętości wody w zbiorniku
-	double pa = 2, ta = 95; // zbiornik a
-	double pb = 1; // zbiornik b
-	double tin = 20, vin = 0.01; // wlewanie do zbiornika b F in = 10 litrów/s
-	double db = 36.5665; // przekrój otwóru wylewającej się wody
-	db=db*1e-4;
-	double da=ud2(0) * 1e-4;
-	double V_A=Y(0);
-	double V_B=Y(1);
-	double T_B=Y(2);
-	dY(0) = -a * b * da * sqrt(2*g*(V_A/pa));
-	dY(1) = -a * b * db * sqrt(2*g*(V_B/pb)) + dY(0) + vin;
-	dY(2) = (dY(0)/V_B) * (ta - T_B) + (vin/V_B) * (tin - T_B);
+	double a = 0.98;
+	double b = 0.63; 
+	double g = 9.81; // zmiana objętości wody w zbiorniku
+	double PA = 0.5;
+	double TA = 90.0; // zbiornik a
+	double PB = 1.0; // zbiornik b
+	double Tin = 20.0;
+	double Fin = 0.01; // wlewanie do zbiornika b F in = 10 litrów/s
+	//double db = 36.5665; // przekrój otwóru wylewającej się wody
+	//double da = 50.0;
+	//db=db*1e-4;
+	//double da=ud2(0) * 1e-4;
+	double DB = 0.00365665;
+	double DA = ud1(0);
+	double VA=Y(0);
+	double VB=Y(1);
+	double TB=Y(2);
+
+	double FAout = VA > 0 ? a * b * DA * sqrt(2 * g * VA / PA) : 0;
+    double FBout = VB > 0 ? a * b * DB * sqrt(2 * g * VB / PB) : 0;
+	dY(0) = -FAout;
+	dY(1) = FAout + Fin - FBout; 
+	dY(2) = (FAout / VB) * (TA - TB) + (Fin / VB) * (Tin - TB);
 
 	return dY;
 }
