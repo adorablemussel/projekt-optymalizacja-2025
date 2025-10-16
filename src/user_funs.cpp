@@ -42,19 +42,19 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 	ud2_local(0)=x(0);
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2_local);
 	int n = get_len(Y[0]);
-	double maxT_B = Y[2](0,0);
+	int* cos = get_size(Y[0]);
+	cout<<*cos<<endl;
+	double maxT_B = Y[1](0,0);
 	for(int i=1;i<n;i++)
 	{
-		if(m2d(Y[2](i,0))>maxT_B)
+		if(m2d(Y[1](i,0))>maxT_B)
 		{
-			maxT_B=m2d(Y[2](i,0));
+			maxT_B=m2d(Y[1](i,0));
 		}
 	}
 	y=abs(maxT_B - m2d(ud1));
 	Y[0].~matrix();											
 	Y[1].~matrix();
-	Y[2].~matrix();
-	
 	return y;
 }
 

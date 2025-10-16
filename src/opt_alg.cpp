@@ -105,7 +105,6 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
-		cout<<"jestem w fibonacim"<<endl;
 		//Tu wpisz kod funkcji
 		//std::cout << std::setprecision(8);
 		std::vector<int> phi = { 1,1 };
@@ -135,7 +134,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			}
 			ci.push_back(bi[i+1] - double(phi[k - i - 2]) / phi[k - i - 1] * (bi[i+1] - ai[i+1]));
 			di.push_back(ai[i+1] + bi[i+1] - ci[i+1]);
-		};
+		}
 		Xopt = ci[k - 3 + 1];
 		Xopt.fit_fun(ff,ud1,ud2);
 		return Xopt;

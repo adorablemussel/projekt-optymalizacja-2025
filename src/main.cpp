@@ -73,18 +73,17 @@ void lab1()
 	double epsilon = 1e-2;
 	double gamma = 1e-6;
 	int Nmax = 10000;
-	matrix lb(-100), ub(100);
-	double* p = new double[2];
-	p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
+	//matrix lb(-100), ub(100);
+	//double* p = new double[2];
+	//p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
 	//cout << p[0] << endl;
 	//cout << p[1] << endl;					// dolne oraz górne ograniczeni							// dok³adne rozwi¹zanie optymalne
-	solution opt;		// rozwi¹zanie optymalne znalezione przez algorytm
-	opt = fib(ff1T, p[0],p[1], epsilon, lb, ub);			// wywo³anie procedury optymalizacji
-	cout << opt << endl << endl;
-	solution opt1;		// rozwi¹zanie optymalne znalezione przez algorytm
-	opt1 = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax, lb, ub);			// wywo³anie procedury optymalizacji
-	cout << opt1 << endl << endl;// wypisanie wyniku
-	solution::clear_calls();
+	//solution opt;		// rozwi¹zanie optymalne znalezione przez algorytm
+	//opt = fib(ff1T, p[0],p[1], epsilon, lb, ub);			// wywo³anie procedury optymalizacji
+	//cout << opt << endl << endl;
+	//solution opt1;		// rozwi¹zanie optymalne znalezione przez algorytm
+	//opt1 = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax, lb, ub);			// wywo³anie procedury optymalizacji
+	//cout << opt1 << endl << endl;// wypisanie wyniku
 	solution opt2;
 	opt2 = fib(ff1R, 1.0, 100.0, epsilon, 50);
 	//opt2 = lag(ff1R, 1.0, 100.0, epsilon, gamma, Nmax, 50);
