@@ -93,32 +93,47 @@ void lab1()
 	for(int j=0;j<3;j++){
 		alpha = (rand() % 200+100)/100.0;
 		Sout << "\n\n\nWspolczynnik ekspansji: " << alpha << '\n'
-		<< "Lp.;x(0);a;b;x*_Fib;y*_Fib;x*_Lagr;y*_Lagr\n";
+		<< "Lp.;x(0);a;b;fcalls_Eksp;x*_Fib;y*_Fib;fcalls_Fib;Minimum lokalne/globalne;x*_Lagr;y*_Lagr;fcalls_Lagr;Minimum lokalne/globalne\n\n";
 		for (int i = 0; i < 100; i++)
 		{
-    	x0 = rand() % 100;
-
-    	res = expansion(ff1T, x0, d, alpha, Nmax);
+		solution::clear_calls();
+    	x0 = rand() % 200-99;
+    	res = expansion(ff1T, x0, d, alpha, Nmax,lb,ub);
+		int callsExp = solution::f_calls;
+		solution::clear_calls();
     	wynik = fib(ff1T, res[0], res[1], epsilon);
+		int callsFib = wynik.f_calls;
+		solution::clear_calls();
     	wynik2 = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
-
+		int callsLag = wynik2.f_calls;
+		string czyGlobalne = (wynik.x(0) > 53.0) ? "globalne" : "lokalne";
     	cout << i + 1 << ';'
          << x0 << ';'
          << double_to_string_comma(res[0]) << ';'
          << double_to_string_comma(res[1]) << ';'
+		 << callsExp<< ';'
          << wynik.x << ' '
          << wynik.y<< ' '
+		 << callsFib<< ';'
+		 << czyGlobalne << ';'
          << wynik2.x << ' '
-         << wynik2.y << '\n';
+         << wynik2.y << ' '
+		 << callsLag<< ';'
+		 << czyGlobalne << '\n';
 
     	Sout << i + 1 << ';'
          << x0 << ';'
          << double_to_string_comma(res[0]) << ';'
          << double_to_string_comma(res[1]) << ';'
+		 << callsExp<< ';'
          << wynik.x << ' '
          << wynik.y<< ' '
+		 << callsFib<< ';'
+		<< czyGlobalne << ';'
          << wynik2.x << ' '
-         << wynik2.y << '\n';
+         << wynik2.y << ' '
+		 << callsLag<< ';'
+		 << czyGlobalne << '\n';
 		}
 	}
 	Sout.close();

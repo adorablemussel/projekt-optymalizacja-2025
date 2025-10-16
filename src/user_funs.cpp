@@ -26,7 +26,7 @@ matrix ff0R(matrix x, matrix ud1, matrix ud2)				// funkcja celu dla problemu rz
 matrix ff1T(matrix x, matrix ud1, matrix ud2)
 {
 	matrix y;
-	y = -cos(0.1 * x(0)) * exp(-(0.1 * x(0) - 2 * M_PI) * (0.1 * x(0) - 2 * M_PI)) + 0.002 * (0.1 * x(0) * (0.1 * x(0)));
+	y = -cos(0.1 * x(0)) * exp(-(0.1 * x(0) - 2 * 3.14) * (0.1 * x(0) - 2 * 3.14)) + 0.002 * (0.1 * x(0) * (0.1 * x(0)));
 
 	return y;
 }
@@ -42,8 +42,7 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 	ud2_local(0)=x(0);
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2_local);
 	int n = get_len(Y[0]);
-	int* cos = get_size(Y[0]);
-	cout<<*cos<<endl;
+	//cout<<*get_size(*Y)<<endl;
 	double maxT_B = Y[1](0,0);
 	for(int i=1;i<n;i++)
 	{

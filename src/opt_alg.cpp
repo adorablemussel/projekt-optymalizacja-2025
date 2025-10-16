@@ -122,7 +122,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 
 		ci.push_back(b - double(phi[k - 1]) / phi[k] * (b - a));
 		di.push_back(a + b - ci[0]);
-		std::cout << ai[0] << " " << bi[0] << " " << ci[0] << " " << di[0] << "\n";
+		//std::cout << ai[0] << " " << bi[0] << " " << ci[0] << " " << di[0] << "\n";
 		for (int i = 0; i<=k - 3; i++) {
 			if (ff(ci[i],ud1, ud2) < ff(di[i], ud1, ud2)) {
 				ai.push_back(ai[i]);
@@ -148,93 +148,102 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 
 solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax, matrix ud1, matrix ud2)
 {
-	try
-	{
-		solution Xopt;
-		auto f = [&](double x)->double {
-			matrix X(1, 1, x);
-			return m2d(ff(X, ud1, ud2));
-			};
+    try
+    {
+        solution Xopt;
+        auto f = [&](double x)->double {
+            matrix X(1, 1, x);
+            return m2d(ff(X, ud1, ud2));
+        };
 
-		// brak argumentu c w sygnaturze - użyjemy środka jako c(0)
-		double aa = a, bb = b;
-		double c = 0.5 * (aa + bb);
+        double aa = a, bb = b;
+        double c = 0.5 * (aa + bb);
 
-		double fa = f(aa), fb = f(bb), fc = f(c);
-		int fcalls = 3;
-		double prev_d = NAN;
-		double d = NAN;
-		while (true)
-		{
-			if (fcalls > Nmax)
-				throw string("lag: przekroczono Nmax");
+        double fa = f(aa), fb = f(bb), fc = f(c);
+        int fcalls = 3;
+        double prev_d = NAN;
+        double d = NAN;
 
-			// oblicz l i m zgodnie z pseudokodem
-			double l = fa * (bb * bb - c * c) + fb * (c * c - aa * aa) + fc * (aa * aa - bb * bb);
-			double m = fa * (bb - c) + fb * (c - aa) + fc * (aa - bb);
+        while (true)
+        {
+            if (fcalls > Nmax)
+                throw string("lag: przekroczono Nmax");
 
-			if (m <= 0)
-				throw string("lag: m <= 0 (blad interpolacji)");
+            double l = fa * (bb*bb - c*c) + fb * (c*c - aa*aa) + fc * (aa*aa - bb*bb);
+            double m = fa * (bb - c) + fb * (c - aa) + fc * (aa - bb);
 
-			d = 0.5 * l / m;
+            if (fabs(m) < 1e-12) // zabezpieczenie przed dzieleniem przez zero
+            {
+                d = c; // ustaw na środek
+            }
+            else
+            {
+                d = 0.5 * l / m;
+                // ograniczenie d do przedziału [aa, bb]
+                if (d <= aa) d = aa + 1e-12;
+                if (d >= bb) d = bb - 1e-12;
+            }
 
-			if (aa < d && d < c)
-			{
-				double fd = f(d); ++fcalls;
-				if (fd < fc)
-				{
-					// a(i+1) = a(i); c(i+1) = d(i); b(i+1) = c(i)
-					bb = c; fb = fc;
-					c = d; fc = fd;
-				}
-				else
-				{
-					// a(i+1) = d(i); c(i+1) = c(i); b(i+1) = b(i)
-					aa = d; fa = fd;
-				}
-			}
-			else if (c < d && d < bb)
-			{
-				double fd = f(d); ++fcalls;
-				if (fd < fc)
-				{
-					// a(i+1) = c(i); c(i+1) = d(i); b(i+1) = b(i)
-					aa = c; fa = fc;
-					c = d; fc = fd;
-				}
-				else
-				{
-					// a(i+1) = a(i); c(i+1) = c(i); b(i+1) = d(i)
-					bb = d; fb = fd;
-				}
-			}
-			else
-			{
-				throw string("lag: d poza przedzialem");
-			}
-				// warunki stopu
-				if ((bb - aa) < epsilon)
-				{
-					Xopt.x = matrix(1, 1, 0.5 * (aa + bb));
-					Xopt.fit_fun(ff, ud1, ud2);
-					Xopt.flag = 1;
-					return Xopt;
-				}
-			if (!isnan(prev_d) && fabs(d - prev_d) < gamma)
-			{
-				Xopt.x = matrix(1, 1, d);
-				Xopt.fit_fun(ff, ud1, ud2);
-				Xopt.flag = 1;
-				return Xopt;
-			}
-			prev_d = d;
-		}
-	}
-	catch (string ex_info)
-	{
-		throw ("solution lag(...):\n" + ex_info);
-	}
+            double fd = f(d); ++fcalls;
+
+            // aktualizacja przedziału
+            if (aa < d && d < c)
+            {
+                if (fd < fc)
+                {
+                    bb = c; fb = fc;
+                    c = d; fc = fd;
+                }
+                else
+                {
+                    aa = d; fa = fd;
+                }
+            }
+            else if (c < d && d < bb)
+            {
+                if (fd < fc)
+                {
+                    aa = c; fa = fc;
+                    c = d; fc = fd;
+                }
+                else
+                {
+                    bb = d; fb = fd;
+                }
+            }
+            else
+            {
+                // jeśli d wciąż wypadł poza przedział, przypisz do najbliższego krańca
+                if (d <= aa) d = aa;
+                else if (d >= bb) d = bb;
+            }
+
+            // warunki stopu
+            if ((bb - aa) < epsilon)
+            {
+                Xopt.x = matrix(1, 1, 0.5 * (aa + bb));
+                Xopt.fit_fun(ff, ud1, ud2);
+                Xopt.flag = 1;
+                return Xopt;
+            }
+
+            if (!isnan(prev_d) && fabs(d - prev_d) < gamma)
+            {
+                Xopt.x = matrix(1, 1, d);
+                Xopt.fit_fun(ff, ud1, ud2);
+                Xopt.flag = 1;
+                return Xopt;
+            }
+
+            prev_d = d;
+        }
+    }
+    catch (const string& ex_info)
+    {
+        throw string("solution lag(...):\n" + ex_info);
+    }
 }
+
 
 solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
