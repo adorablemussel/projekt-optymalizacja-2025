@@ -9,6 +9,17 @@ Data ostatniej modyfikacji: 30.09.2025
 *********************************************/
 
 #include"opt_alg.h"
+#include <iomanip> 
+
+std::string double_to_string_comma(double x, int precision = 6) {
+    std::ostringstream oss;
+    oss << x;
+    std::string s = oss.str();
+    for (auto& c : s) {
+        if (c == '.') c = ',';
+    }
+    return s;
+}
 
 void lab0();
 void lab1();
@@ -69,10 +80,50 @@ void lab0()
 
 void lab1()
 {
-	//Funkcja testowa
+	std::ofstream Sout("symulacja_lab1.csv");
+	//zadanie teoretyczne
+
+	double* res = new double[2] { 0.f, 0.f };
+	matrix lb(-100), ub(100);
+	double x0, d = 5, alpha = 1.5;
 	double epsilon = 1e-2;
 	double gamma = 1e-6;
 	int Nmax = 10000;
+	solution wynik,wynik2;
+	for(int j=0;j<3;j++){
+		alpha = (rand() % 200+100)/100.0;
+		Sout << "\n\n\nWspolczynnik ekspansji: " << alpha << '\n'
+		<< "Lp.;x(0);a;b;x*_Fib;y*_Fib;x*_Lagr;y*_Lagr\n";
+		for (int i = 0; i < 100; i++)
+		{
+    	x0 = rand() % 100;
+
+    	res = expansion(ff1T, x0, d, alpha, Nmax);
+    	wynik = fib(ff1T, res[0], res[1], epsilon);
+    	wynik2 = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+
+    	cout << i + 1 << ';'
+         << x0 << ';'
+         << double_to_string_comma(res[0]) << ';'
+         << double_to_string_comma(res[1]) << ';'
+         << wynik.x << ' '
+         << wynik.y<< ' '
+         << wynik2.x << ' '
+         << wynik2.y << '\n';
+
+    	Sout << i + 1 << ';'
+         << x0 << ';'
+         << double_to_string_comma(res[0]) << ';'
+         << double_to_string_comma(res[1]) << ';'
+         << wynik.x << ' '
+         << wynik.y<< ' '
+         << wynik2.x << ' '
+         << wynik2.y << '\n';
+		}
+	}
+	Sout.close();
+
+	//Funkcja testowa
 	//matrix lb(-100), ub(100);
 	//double* p = new double[2];
 	//p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
@@ -84,10 +135,10 @@ void lab1()
 	//solution opt1;		// rozwi¹zanie optymalne znalezione przez algorytm
 	//opt1 = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax, lb, ub);			// wywo³anie procedury optymalizacji
 	//cout << opt1 << endl << endl;// wypisanie wyniku
-	solution opt2;
-	opt2 = fib(ff1R, 1.0, 100.0, epsilon, 50);
-	//opt2 = lag(ff1R, 1.0, 100.0, epsilon, gamma, Nmax, 50);
-	cout << opt2 << endl << endl;
+	// solution opt2;
+	// opt2 = fib(ff1R, 1.0, 100.0, epsilon, 50);
+	// //opt2 = lag(ff1R, 1.0, 100.0, epsilon, gamma, Nmax, 50);
+	// cout << opt2 << endl << endl;
 }
 
 void lab2()
