@@ -118,7 +118,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
        solution Xc(c_i),Xd(d_i);
        Xc.fit_fun(ff, ud1, ud2);
        Xd.fit_fun(ff, ud1, ud2);
-       for (int i = 0; i <= k - 2; i++)
+       for (int i = 0; i <= k - 3; i++)
        {
            if (m2d(Xc.y) < m2d(Xd.y))
            {
