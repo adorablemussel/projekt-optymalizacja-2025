@@ -112,33 +112,37 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 
        double a_i = a;
        double b_i = b;
-       solution c_i(Fk1 / Fk) * (b_i - a_i);
-	   solution d_i(a_i + b_i - c_i);;
+	   double c_i = b_i - (Fk1 / Fk) * (b_i - a_i);
+	   double d_i = a_i + b_i - c_i;
+
+       solution Xc(c_i),Xd(d_i);
        c_i.fit_fun(ff, ud1, ud2);
        d_i.fit_fun(ff, ud1, ud2);
        for (int i = 0; i <= k - 2; i++)
        {
-           if (m2d(c_i.y) < m2d(d_i.y))
+           if (m2d(Xc.y) < m2d(Xd.y))
            {
-               b_i = m2d(d_i.x);
-               d_i = c_i;
+               b_i = m2d(xD.x);
+               Xd = Xc;
 
                Fk1 = (double)fib_num(k - i - 2);
                Fk = (double)fib_num(k - i - 1);
-               c_i = solution(b_i - (Fk1 / Fk) * (b_i - a_i));
-               c_i.fit_fun(ff, ud1, ud2);
+               c_i = b_i - (Fk1 / Fk) * (b_i - a_i);
+               Xc = solution(c_i);
+               Xc.fit_fun(ff, ud1, ud2);
            }
            else
            {
-               a_i = m2d(c_i.x);
-			   c_i = d_i;
-               double Fk_i_minus_2 = (double)fib_num(k - i - 2);
-               double Fk_i_minus_1 = (double)fib_num(k - i - 1);
-               d_i = solution(a_i + b_i - c_i;);
-               d_i.fit_fun(ff, ud1, ud2);
+               a_i = m2d(Xc.x);
+			   Xc = Xd;
+               Fk1= (double)fib_num(k - i - 2);
+        		Fk = (double)fib_num(k - i - 1);
+               d_i = a_i + b_i - c_i;
+               Xd = solution(d_i);
+               Xd.fit_fun(ff, ud1, ud2);
            }
        }
-       Xopt = c_i;
+       Xopt = Xc;
        Xopt.fit_fun(ff, ud1, ud2);
        Xopt.flag = 1;
        return Xopt;
