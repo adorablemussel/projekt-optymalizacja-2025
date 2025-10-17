@@ -1,4 +1,5 @@
 #include"user_funs.h"
+
 long long fib_num(int k)
 {
 	if (k <= 0) return 0;

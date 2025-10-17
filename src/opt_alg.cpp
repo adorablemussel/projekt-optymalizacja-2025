@@ -116,13 +116,13 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	   double d_i = a_i + b_i - c_i;
 
        solution Xc(c_i),Xd(d_i);
-       c_i.fit_fun(ff, ud1, ud2);
-       d_i.fit_fun(ff, ud1, ud2);
+       Xc.fit_fun(ff, ud1, ud2);
+       Xd.fit_fun(ff, ud1, ud2);
        for (int i = 0; i <= k - 2; i++)
        {
            if (m2d(Xc.y) < m2d(Xd.y))
            {
-               b_i = m2d(xD.x);
+               b_i = m2d(Xd.x);
                Xd = Xc;
 
                Fk1 = (double)fib_num(k - i - 2);
