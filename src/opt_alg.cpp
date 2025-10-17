@@ -105,39 +105,43 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
-		//std::cout << std::setprecision(8);
-		std::vector<int> phi = { 1,1 };
-		int k = 2;
-		while(true) {
-			int j = phi[k - 1] + phi[k - 2];
-			phi.push_back(j);
-			if (j > (b - a) / epsilon) break;
-			k++;
-		}
-		std::vector<double> ai = { a };
-		std::vector<double> bi = { b };
-		std::vector<double> ci;
-		std::vector<double> di;
+       int k = 0;
 
-		ci.push_back(b - double(phi[k - 1]) / phi[k] * (b - a));
-		di.push_back(a + b - ci[0]);
-		//std::cout << ai[0] << " " << bi[0] << " " << ci[0] << " " << di[0] << "\n";
-		for (int i = 0; i<=k - 3; i++) {
-			if (ff(ci[i],ud1, ud2) < ff(di[i], ud1, ud2)) {
-				ai.push_back(ai[i]);
-				bi.push_back(di[i]);
-			}
-			else {
-				bi.push_back(bi[i]);
-				ai.push_back(ci[i]);
-			}
-			ci.push_back(bi[i+1] - double(phi[k - i - 2]) / phi[k - i - 1] * (bi[i+1] - ai[i+1]));
-			di.push_back(ai[i+1] + bi[i+1] - ci[i+1]);
-		}
-		Xopt = ci[k - 3 + 1];
-		Xopt.fit_fun(ff,ud1,ud2);
-		return Xopt;
+       double Fk1 = (double)fib_num(k - 1);
+       double Fk = (double)fib_num(k);
+
+       double a_i = a;
+       double b_i = b;
+       solution c_i(Fk1 / Fk) * (b_i - a_i);
+	   solution d_i(a_i + b_i - c_i);;
+       c_i.fit_fun(ff, ud1, ud2);
+       d_i.fit_fun(ff, ud1, ud2);
+       for (int i = 0; i <= k - 2; i++)
+       {
+           if (m2d(c_i.y) < m2d(d_i.y))
+           {
+               b_i = m2d(Xd.x);
+               d_i = c_i;
+
+               Fk1 = (double)fib_num(k - i - 2);
+               Fk = (double)fib_num(k - i - 1);
+               c_i = solution(b_i - (Fk1 / Fk) * (b_i - a_i));
+               Xc.fit_fun(ff, ud1, ud2);
+           }
+           else
+           {
+               a_i = m2d(c_i.x);
+			   c_i = d_i;
+               double Fk_i_minus_2 = (double)fib_num(k - i - 2);
+               double Fk_i_minus_1 = (double)fib_num(k - i - 1);
+               d_i = solution(a_i + b_i - c_i;);
+               d_i.fit_fun(ff, ud1, ud2);
+           }
+       }
+       Xopt = c_i;
+       Xopt.fit_fun(ff, ud1, ud2);
+       Xopt.flag = 1;
+       return Xopt;
 	}
 	catch (string ex_info)
 	{
