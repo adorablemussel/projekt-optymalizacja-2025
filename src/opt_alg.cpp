@@ -160,100 +160,134 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 
 solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax, matrix ud1, matrix ud2)
 {
-    try
-    {
-        solution Xopt;
-        auto f = [&](double x)->double {
-            matrix X(1, 1, x);
-            return m2d(ff(X, ud1, ud2));
-        };
+	try
+	{
+		solution Xopt;
 
-        double aa = a, bb = b;
-        double c = 0.5 * (aa + bb);
+       // Krok 2: a(0) = a, b(0) = b.
+       // Krok 1: Deklaracja kluczowych zmiennych PRZED pętlą, aby były dostępne w całym zakresie.
+       double a_i = a;
+       double b_i = b;
+       // Założenie dla punktu wewnętrznego c(0) (wg pseudokodu musi być podany)
+       // Jeśli nie jest podany, używamy środka:
+       double c_i = (a + b) / 2.0;
 
-        double fa = f(aa), fb = f(bb), fc = f(c);
-        int fcalls = 3;
-        double prev_d = NAN;
-        double d = NAN;
+       // Deklaracja zmiennych d_i i d_i_prev przed pętlą
+       double d_i;
+       double d_i_prev = c_i; // Wymagane do kryterium |d(i) - d(i-1)| < gamma
 
-        while (true)
-        {
-            if (fcalls > Nmax)
-                throw string("lag: przekroczono Nmax");
+       // Deklaracja obiektów solution przed pętlą
+       solution Xa(a_i), Xb(b_i), Xc(c_i), Xd;
 
-            double l = fa * (bb*bb - c*c) + fb * (c*c - aa*aa) + fc * (aa*aa - bb*bb);
-            double m = fa * (bb - c) + fb * (c - aa) + fc * (aa - bb);
+       // Wymagane obliczenia początkowe dla a, b, c
+       Xa.fit_fun(ff, ud1, ud2);
+       Xb.fit_fun(ff, ud1, ud2);
+       Xc.fit_fun(ff, ud1, ud2);
 
-            if (fabs(m) < 1e-12) // zabezpieczenie przed dzieleniem przez zero
-            {
-                d = c; // ustaw na środek
-            }
-            else
-            {
-                d = 0.5 * l / m;
-                // ograniczenie d do przedziału [aa, bb]
-                if (d <= aa) d = aa + 1e-12;
-                if (d >= bb) d = bb - 1e-12;
-            }
 
-            double fd = f(d); ++fcalls;
+       // Krok 3: repeat (i = 0 do nieskonczoności, z kryteriami stopu)
+       for (int i = 0; solution::f_calls < Nmax; ++i)
+       {
+           // Sprawdzenie kryterium stopu na początku pętli
+           // Krok 39: until b(i) – a(i) < ? or |d(i) – d(i-1)| < ?
+           if (i > 0 && ((b_i - a_i < epsilon) || (fabs(d_i - d_i_prev) < gamma)))
+           {
+               Xopt.flag = 1; // Optymalizacja zakończona sukcesem
+               break;
+           }
 
-            // aktualizacja przedziału
-            if (aa < d && d < c)
-            {
-                if (fd < fc)
-                {
-                    bb = c; fb = fc;
-                    c = d; fc = fd;
-                }
-                else
-                {
-                    aa = d; fa = fd;
-                }
-            }
-            else if (c < d && d < bb)
-            {
-                if (fd < fc)
-                {
-                    aa = c; fa = fc;
-                    c = d; fc = fd;
-                }
-                else
-                {
-                    bb = d; fb = fd;
-                }
-            }
-            else
-            {
-                // jeśli d wciąż wypadł poza przedział, przypisz do najbliższego krańca
-                if (d <= aa) d = aa;
-                else if (d >= bb) d = bb;
-            }
+           // Wymagane są aktualne wartości funkcji w punktach a, b, c
+           double fa = m2d(Xa.y), fb = m2d(Xb.y), fc = m2d(Xc.y);
 
-            // warunki stopu
-            if ((bb - aa) < epsilon)
-            {
-                Xopt.x = matrix(1, 1, 0.5 * (aa + bb));
-                Xopt.fit_fun(ff, ud1, ud2);
-                Xopt.flag = 1;
-                return Xopt;
-            }
+           // Krok 4 & 5: Obliczenie l i m
+           double l = fa * (pow(b_i, 2) - pow(c_i, 2)) + fb * (pow(c_i, 2) - pow(a_i, 2)) + fc * (pow(a_i, 2) - pow(b_i, 2));
+           double m = fa * (b_i - c_i) + fb * (c_i - a_i) + fc * (a_i - b_i);
 
-            if (!isnan(prev_d) && fabs(d - prev_d) < gamma)
-            {
-                Xopt.x = matrix(1, 1, d);
-                Xopt.fit_fun(ff, ud1, ud2);
-                Xopt.flag = 1;
-                return Xopt;
-            }
+           // Krok 6 & 7: if m <= 0 then return error
+           if (m <= 0.0)
+           {
+               Xopt.flag = -1;
+               Xopt.x = c_i;
+               Xopt.fit_fun(ff, ud1, ud2);
+               return Xopt;
+           }
 
-            prev_d = d;
-        }
-    }
-    catch (const string& ex_info)
-    {
-        throw string("solution lag(...):\n" + ex_info);
-    }
+           // Krok 9: d(i) = 0,5 * l / m
+           d_i_prev = d_i; // Zapis d(i-1) przed obliczeniem d(i)
+           d_i = 0.5 * l / m;
+           Xd.x = d_i;
+
+           // Sprawdzenie, czy d(i) jest w przedziale [a,b]
+           if (a_i < d_i && d_i < b_i)
+           {
+               Xd.fit_fun(ff, ud1, ud2);
+
+               // Krok 10: if a(i) < d(i) < c(i) then
+               if (d_i < c_i)
+               {
+                   // Krok 11-14: if f(d(i)) < f(c(i))
+                   if (m2d(Xd.y) < m2d(Xc.y))
+                   {
+                       // a(i+1)=a(i), c(i+1)=d(i), b(i+1)=c(i)
+                       b_i = c_i;
+                       c_i = d_i;
+                       Xb = Xc;
+                       Xc = Xd;
+                   }
+                   else // Krok 15-18
+                   {
+                       // a(i+1)=d(i), c(i+1)=c(i), b(i+1)=b(i)
+                       a_i = d_i;
+                       Xa = Xd;
+                   }
+               }
+               // Krok 21: else if c(i) < d(i) < b(i) then
+               else // (d_i > c_i)
+               {
+                   // Krok 22-25: if f(d(i)) < f(c(i))
+                   if (m2d(Xd.y) < m2d(Xc.y))
+                   {
+                       // a(i+1)=c(i), c(i+1)=d(i), b(i+1)=b(i)
+                       a_i = c_i;
+                       c_i = d_i;
+                       Xa = Xc;
+                       Xc = Xd;
+                   }
+                   else // Krok 26-29
+                   {
+                       // a(i+1)=a(i), c(i+1)=c(i), b(i+1)=d(i)
+                       b_i = d_i;
+                       Xb = Xd;
+                   }
+               }
+           }
+           // Krok 31-33: else return error (d(i) jest poza [a, b])
+           else
+           {
+               Xopt.flag = -1;
+               Xopt.x = c_i;
+               Xopt.fit_fun(ff, ud1, ud2);
+               return Xopt;
+           }
+
+           // Krok 36: Sprawdzenie Nmax
+           if (solution::f_calls >= Nmax)
+           {
+               Xopt.flag = 0; // Oznaczenie osiągnięcia Nmax
+               break;
+           }
+       		//std::cout << i + 1 << " " << (b_i - a_i) << std::endl;
+       } // end repeat
+
+       // Krok 40: return x* = d(i)
+       Xopt.x = d_i;
+       Xopt.fit_fun(ff, ud1, ud2);
+       return Xopt;
+	}
+	catch (string ex_info)
+	{
+		throw ("solution lag(...):\n" + ex_info);
+	}
 }
 
 
