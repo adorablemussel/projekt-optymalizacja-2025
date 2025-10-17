@@ -120,13 +120,13 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
        {
            if (m2d(c_i.y) < m2d(d_i.y))
            {
-               b_i = m2d(Xd.x);
+               b_i = m2d(d_i.x);
                d_i = c_i;
 
                Fk1 = (double)fib_num(k - i - 2);
                Fk = (double)fib_num(k - i - 1);
                c_i = solution(b_i - (Fk1 / Fk) * (b_i - a_i));
-               Xc.fit_fun(ff, ud1, ud2);
+               c_i.fit_fun(ff, ud1, ud2);
            }
            else
            {
