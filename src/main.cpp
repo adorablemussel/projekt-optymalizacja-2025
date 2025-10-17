@@ -139,10 +139,7 @@ void lab1()
 	Sout.close();
 
 	//Funkcja testowa
-	double epsilon = 0.0001;
-	double gamma = 1e-6;
-	int Nmax = 1000;
-	matrix lb(-100), ub(100);
+	
 	double* p = new double[2];
 	p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
 	//cout << p[0] << endl;
@@ -153,12 +150,12 @@ void lab1()
 	//solution opt1;		// rozwi¹zanie optymalne znalezione przez algorytm
 	//opt1 = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax, lb, ub);			// wywo³anie procedury optymalizacji
 	//cout << opt1 << endl << endl;// wypisanie wyniku
-	double* oge = new double[2];
-	oge = expansion(ff1R, 0.005, 0.002, 1.5, Nmax);
-	solution opt2;
-	opt2 = fib(ff1R, 0.0001, 0.01, epsilon);
-	cout << opt2 << endl << endl;
-	cout<<opt2.x<<endl;
+	// double* oge = new double[2];
+	// oge = expansion(ff1R, 0.005, 0.002, 1.5, Nmax);
+	// solution opt2;
+	// opt2 = fib(ff1R, 0.0001, 0.01, epsilon);
+	// cout << opt2 << endl << endl;
+	// cout<<opt2.x<<endl;
 
 	matrix Y0 = matrix(3,1);
 	Y0(0)=5.0;	//objętość zbiornika a
@@ -167,14 +164,13 @@ void lab1()
 	matrix ud1(1, 1), ud2;
 	ud1(0) = 0.002;
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
-	ofstream Sout("symulacja_lab1.csv");					// definiujemy strumieñ do pliku .csv
-	Sout << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
-	Sout.close();											// zamykamy strumieñ
+	ofstream Sout2("symulacja_lab1.csv");					// definiujemy strumieñ do pliku .csv
+	Sout2 << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
+	Sout2.close();											// zamykamy strumieñ
 	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
 	Y[1].~matrix();
 	solution xd=0.005;
-	
-	cout<<xd.fit_fun(ff1R);
+
 }
 
 void lab2()
