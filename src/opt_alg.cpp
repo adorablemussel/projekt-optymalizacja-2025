@@ -106,7 +106,11 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	{
 		solution Xopt;
        int k = 0;
-
+		double length_ratio = (b - a) / epsilon;
+       while (fib_num(k) <= length_ratio)
+       {
+           k++;
+       }
        double Fk1 = (double)fib_num(k - 1);
        double Fk = (double)fib_num(k);
 
@@ -118,7 +122,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
        solution Xc(c_i),Xd(d_i);
        Xc.fit_fun(ff, ud1, ud2);
        Xd.fit_fun(ff, ud1, ud2);
-       for (int i = 0; i <= k - 2; i++)
+       for (int i = 0; i <= k - 3; ++i)
        {
            if (m2d(Xc.y) < m2d(Xd.y))
            {
