@@ -10,7 +10,7 @@ BUILD_DIR = build
 program.exe: $(SRC_DIR)/*.cpp
 	$(CPPCOMP) $(OPT) -I $(INCLUDE_DIR) $(SRC_DIR)/*.cpp -o ${BUILD_DIR}/program.exe
 
-run:
+run: program.exe
 	./${BUILD_DIR}/program.exe
 
 clean:

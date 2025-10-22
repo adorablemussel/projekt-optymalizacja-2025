@@ -8,8 +8,8 @@ Akademia Górniczo-Hutnicza
 Data ostatniej modyfikacji: 30.09.2025
 *********************************************/
 
-#include"opt_alg.h"
-#include <iomanip> 
+#include "opt_alg.h"
+
 
 std::string double_to_string_comma(double x, int precision = 6) {
     std::ostringstream oss;
@@ -33,7 +33,7 @@ int main()
 {
 	try
 	{
-		//lab0();
+		// lab0();
 		lab1();
 	}
 	catch (string EX_INFO)
@@ -71,7 +71,7 @@ void lab0()
 	matrix Y0 = matrix(2, 1),								// Y0 zawiera warunki pocz¹tkowe
 		MT = matrix(2, new double[2] { m2d(opt.x), 0.5 });	// MT zawiera moment si³y dzia³aj¹cy na wahad³o oraz czas dzia³ania
 	matrix* Y = solve_ode(df0, 0, 0.1, 10, Y0, NAN, MT);	// rozwi¹zujemy równanie ró¿niczkowe
-	ofstream Sout("symulacja_lab0.csv");					// definiujemy strumieñ do pliku .csv
+	ofstream Sout("data/results/symulacja_lab0.csv");					// definiujemy strumieñ do pliku .csv
 	Sout << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
 	Sout.close();											// zamykamy strumieñ
 	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
@@ -80,7 +80,7 @@ void lab0()
 
 void lab1()
 {
-	std::ofstream Sout("symulacja_lab1_teoretyczny.csv");
+	std::ofstream Sout("data/results/symulacja_lab1.csv");
 	//zadanie teoretyczne
 
 	double* res = new double[2] { 0.f, 0.f };
@@ -163,8 +163,9 @@ void lab1()
 	Y0(2)=20.0;	//temperatura zbiornika b
 	matrix ud1(1, 1), ud2;
 	ud1(0) = 0.002;
+	// use df1 (3-variable model) — df0 is for the 2-variable pendulum model
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
-	ofstream Sout2("symulacja_lab1_rzeczywisty.csv");					// definiujemy strumieñ do pliku .csv
+	ofstream Sout2("data/results/symulacja_lab1.csv");					// definiujemy strumieñ do pliku .csv
 	Sout2 << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
 	Sout2.close();											// zamykamy strumieñ
 	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
