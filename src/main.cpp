@@ -8,8 +8,12 @@ Akademia Górniczo-Hutnicza
 Data ostatniej modyfikacji: 30.09.2025
 *********************************************/
 
-#include"opt_alg.h"
-#include <iomanip> 
+#include "opt_alg.h"
+#include "user_funs.h"
+#include <iomanip>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 std::string double_to_string_comma(double x, int precision = 6) {
     std::ostringstream oss;
@@ -163,6 +167,7 @@ void lab1()
 	Y0(2)=20.0;	//temperatura zbiornika b
 	matrix ud1(1, 1), ud2;
 	ud1(0) = 0.002;
+	// use df1 (3-variable model) — df0 is for the 2-variable pendulum model
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
 	ofstream Sout2("symulacja_lab1.csv");					// definiujemy strumieñ do pliku .csv
 	Sout2 << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
