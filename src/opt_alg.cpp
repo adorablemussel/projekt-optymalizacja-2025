@@ -105,57 +105,40 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
-       int k = 0;
-		double length_ratio = (b - a) / epsilon;
-       while (fib_num(k) <= length_ratio)
-       {
-           k++;
-       }
-       double Fk1 = (double)fib_num(k - 1);
-       double Fk = (double)fib_num(k);
+		solution A(a), B(b), C, D;
+		vector<double> fib_seq = {0.0, 1.0};
+		while (fib_seq.back() < (B.x(0) - A.x(0)) / epsilon) {
+			fib_seq.push_back(fib_seq[fib_seq.size() - 1] + fib_seq[fib_seq.size() - 2]);
+		}
+		int k = fib_seq.size()-1;
+		cout << "Liczba iteracji: " << k <<" "<<fib_seq.back()<<" "<<(B.x(0) - A.x(0)) / epsilon<< endl;
+		C.x(0) = B.x(0) - (fib_seq[k - 1] / fib_seq[k]) * (B.x(0) - A.x(0));
+		D.x(0) = A.x(0) + B.x(0) - C.x(0);
+		C.fit_fun(ff);
+		D.fit_fun(ff);
 
-       double a_i = a;
-       double b_i = b;
-	   double c_i = b_i - (Fk1 / Fk) * (b_i - a_i);
-	   double d_i = a_i + b_i - c_i;
+		for (int i = 0; i < k - 3; i++) {
+			if (C.y(0) < D.y(0)) {
+				B.x = D.x;
+			}
+			else {
+				A.x = C.x;
+			}
+			C.x(0) = B.x(0) - (fib_seq[k - i - 2] / fib_seq[k - i - 1]) * (B.x(0) - A.x(0));
+			D.x(0) = A.x(0) + B.x(0) - C.x(0);
+			C.fit_fun(ff);
+			D.fit_fun(ff);
+		}
 
-       solution Xc(c_i),Xd(d_i);
-       Xc.fit_fun(ff, ud1, ud2);
-       Xd.fit_fun(ff, ud1, ud2);
-       for (int i = 0; i <= k - 3; ++i)
-       {
-           if (m2d(Xc.y) < m2d(Xd.y))
-           {
-               b_i = m2d(Xd.x);
-               Xd = Xc;
-
-               Fk1 = (double)fib_num(k - i - 2);
-               Fk = (double)fib_num(k - i - 1);
-               c_i = b_i - (Fk1 / Fk) * (b_i - a_i);
-               Xc = solution(c_i);
-               Xc.fit_fun(ff, ud1, ud2);
-           }
-           else
-           {
-               a_i = m2d(Xc.x);
-			   Xc = Xd;
-               Fk1= (double)fib_num(k - i - 2);
-        		Fk = (double)fib_num(k - i - 1);
-               d_i = a_i + b_i - c_i;
-               Xd = solution(d_i);
-               Xd.fit_fun(ff, ud1, ud2);
-           }
-       }
-       Xopt = Xc;
-       Xopt.fit_fun(ff, ud1, ud2);
-       Xopt.flag = 1;
-       return Xopt;
+		Xopt.x = C.x(0);
+		Xopt.y = C.y(0);
+		Xopt.flag = 1;
+		return Xopt;
 	}
 	catch (string ex_info)
 	{
 		throw ("solution fib(...):\n" + ex_info);
 	}
-
 }
 
 solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax, matrix ud1, matrix ud2)
@@ -163,126 +146,69 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
+		solution A(a), B(b), C, D, D1;
+		C.x = (a + b) / 2;
+		A.fit_fun(ff);
+		B.fit_fun(ff);
+		C.fit_fun(ff);
+		double l, m;
+		int i = 0;
+		while (true) {
+			l = A.y(0) * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y(0) * (pow(C.x(0), 2) - pow(A.x(0), 2)) + C.y(0) * (pow(A.x(0), 2) - pow(B.x(0), 2));
+			m = (A.y(0) * (B.x(0) - C.x(0))) + (B.y(0) * (C.x(0) - A.x(0))) + (C.y(0) * (A.x(0) - B.x(0)));
+			if (m <= 0) {
+				Xopt.flag = 0;
+				break;
+			}
+			D1.x = D.x;
+			D.x = l / (2 * m);
+			D.fit_fun(ff);
+			if (A.x(0) < D.x(0) && D.x(0) < C.x(0))
+			{
+				if (D.y(0) < C.y(0))
+				{
+					B.x = C.x;
+					C.x = D.x;
+					B.fit_fun(ff);
+					C.fit_fun(ff);
+				}
+				else
+					A.x = D.x;
+				A.fit_fun(ff);
+			}
+			else if (C.x(0) < D.x(0) && D.x(0) < B.x(0))
+			{
+				if (D.y(0) < C.y(0))
+				{
+					A.x = C.x;
+					C.x = D.x;
+					A.fit_fun(ff);
+					C.fit_fun(ff);
+				}
+				else
+					B.x = D.x;
+				B.fit_fun(ff);
+			}
+			else {
+				Xopt.flag = 0;
+				break;
+			}
+			i++;
+			if (i > Nmax) {
+				Xopt.flag = 0;
+				break;
+			}
+			if (B.x(0) - A.x(0) < epsilon || abs(D.x(0) - D1.x(0)) <= gamma)
+			{
+				break;
+			}
+		}
+		D.fit_fun(ff);
+		Xopt.x = D.x(0);
+		Xopt.y = D.y(0);
+		Xopt.flag = 1;
+		return Xopt;
 
-       // Krok 2: a(0) = a, b(0) = b.
-       // Krok 1: Deklaracja kluczowych zmiennych PRZED pętlą, aby były dostępne w całym zakresie.
-       double a_i = a;
-       double b_i = b;
-       // Założenie dla punktu wewnętrznego c(0) (wg pseudokodu musi być podany)
-       // Jeśli nie jest podany, używamy środka:
-       double c_i = (a + b) / 2.0;
-
-       // Deklaracja zmiennych d_i i d_i_prev przed pętlą
-       double d_i;
-       double d_i_prev = c_i; // Wymagane do kryterium |d(i) - d(i-1)| < gamma
-
-       // Deklaracja obiektów solution przed pętlą
-       solution Xa(a_i), Xb(b_i), Xc(c_i), Xd;
-
-       // Wymagane obliczenia początkowe dla a, b, c
-       Xa.fit_fun(ff, ud1, ud2);
-       Xb.fit_fun(ff, ud1, ud2);
-       Xc.fit_fun(ff, ud1, ud2);
-
-
-       // Krok 3: repeat (i = 0 do nieskonczoności, z kryteriami stopu)
-       for (int i = 0; solution::f_calls < Nmax; ++i)
-       {
-           // Sprawdzenie kryterium stopu na początku pętli
-           // Krok 39: until b(i) – a(i) < ? or |d(i) – d(i-1)| < ?
-           if (i > 0 && ((b_i - a_i < epsilon) || (fabs(d_i - d_i_prev) < gamma)))
-           {
-               Xopt.flag = 1; // Optymalizacja zakończona sukcesem
-               break;
-           }
-
-           // Wymagane są aktualne wartości funkcji w punktach a, b, c
-           double fa = m2d(Xa.y), fb = m2d(Xb.y), fc = m2d(Xc.y);
-
-           // Krok 4 & 5: Obliczenie l i m
-           double l = fa * (pow(b_i, 2) - pow(c_i, 2)) + fb * (pow(c_i, 2) - pow(a_i, 2)) + fc * (pow(a_i, 2) - pow(b_i, 2));
-           double m = fa * (b_i - c_i) + fb * (c_i - a_i) + fc * (a_i - b_i);
-
-           // Krok 6 & 7: if m <= 0 then return error
-           if (m <= 0.0)
-           {
-               Xopt.flag = -1;
-               Xopt.x = c_i;
-               Xopt.fit_fun(ff, ud1, ud2);
-               return Xopt;
-           }
-
-           // Krok 9: d(i) = 0,5 * l / m
-           d_i_prev = d_i; // Zapis d(i-1) przed obliczeniem d(i)
-           d_i = 0.5 * l / m;
-           Xd.x = d_i;
-
-           // Sprawdzenie, czy d(i) jest w przedziale [a,b]
-           if (a_i < d_i && d_i < b_i)
-           {
-               Xd.fit_fun(ff, ud1, ud2);
-
-               // Krok 10: if a(i) < d(i) < c(i) then
-               if (d_i < c_i)
-               {
-                   // Krok 11-14: if f(d(i)) < f(c(i))
-                   if (m2d(Xd.y) < m2d(Xc.y))
-                   {
-                       // a(i+1)=a(i), c(i+1)=d(i), b(i+1)=c(i)
-                       b_i = c_i;
-                       c_i = d_i;
-                       Xb = Xc;
-                       Xc = Xd;
-                   }
-                   else // Krok 15-18
-                   {
-                       // a(i+1)=d(i), c(i+1)=c(i), b(i+1)=b(i)
-                       a_i = d_i;
-                       Xa = Xd;
-                   }
-               }
-               // Krok 21: else if c(i) < d(i) < b(i) then
-               else // (d_i > c_i)
-               {
-                   // Krok 22-25: if f(d(i)) < f(c(i))
-                   if (m2d(Xd.y) < m2d(Xc.y))
-                   {
-                       // a(i+1)=c(i), c(i+1)=d(i), b(i+1)=b(i)
-                       a_i = c_i;
-                       c_i = d_i;
-                       Xa = Xc;
-                       Xc = Xd;
-                   }
-                   else // Krok 26-29
-                   {
-                       // a(i+1)=a(i), c(i+1)=c(i), b(i+1)=d(i)
-                       b_i = d_i;
-                       Xb = Xd;
-                   }
-               }
-           }
-           // Krok 31-33: else return error (d(i) jest poza [a, b])
-           else
-           {
-               Xopt.flag = -1;
-               Xopt.x = c_i;
-               Xopt.fit_fun(ff, ud1, ud2);
-               return Xopt;
-           }
-
-           // Krok 36: Sprawdzenie Nmax
-           if (solution::f_calls >= Nmax)
-           {
-               Xopt.flag = 0; // Oznaczenie osiągnięcia Nmax
-               break;
-           }
-       		//std::cout << i + 1 << " " << (b_i - a_i) << std::endl;
-       } // end repeat
-
-       // Krok 40: return x* = d(i)
-       Xopt.x = d_i;
-       Xopt.fit_fun(ff, ud1, ud2);
-       return Xopt;
 	}
 	catch (string ex_info)
 	{
