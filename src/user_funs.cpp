@@ -1,22 +1,5 @@
 #include"user_funs.h"
 
-long long fib_num(int k)
-{
-	if (k <= 0) return 0;
-	if (k == 1) return 1;
-
-	long long prev = 1; // F1
-	long long curr = 1; // F2
-	for (int i = 3; i <= k; ++i)
-	{
-		long long next = prev + curr;
-		prev = curr;
-		curr = next;
-	}
-	return curr;
-}
-
-
 matrix ff0T(matrix x, matrix ud1, matrix ud2)				// funkcja celu dla przypadku testowego
 {
 	matrix y;												// y zawiera wartoœæ funkcji celu

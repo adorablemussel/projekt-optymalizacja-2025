@@ -80,7 +80,7 @@ void lab0()
 
 void lab1()
 {
-	std::ofstream Sout("symulacja_lab1.csv");
+	std::ofstream Sout("symulacja_lab1_teoretyczny.csv");
 	//zadanie teoretyczne
 
 	double* res = new double[2] { 0.f, 0.f };
@@ -164,7 +164,7 @@ void lab1()
 	matrix ud1(1, 1), ud2;
 	ud1(0) = 0.002;
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
-	ofstream Sout2("symulacja_lab1.csv");					// definiujemy strumieñ do pliku .csv
+	ofstream Sout2("symulacja_lab1_rzeczywisty.csv");					// definiujemy strumieñ do pliku .csv
 	Sout2 << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
 	Sout2.close();											// zamykamy strumieñ
 	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
