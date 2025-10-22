@@ -96,44 +96,44 @@ void lab1()
 		<< "Lp.;x(0);a;b;fcalls_Eksp;x*_Fib;y*_Fib;fcalls_Fib;Minimum lokalne/globalne;x*_Lagr;y*_Lagr;fcalls_Lagr;Minimum lokalne/globalne\n\n";
 		for (int i = 0; i < 100; i++)
 		{
-		solution::clear_calls();
-    	x0 = rand() % 200-99;
-    	res = expansion(ff1T, x0, d, alpha, Nmax,lb,ub);
-		int callsExp = solution::f_calls;
-		solution::clear_calls();
-    	wynik = fib(ff1T, res[0], res[1], epsilon);
-		int callsFib = wynik.f_calls;
-		solution::clear_calls();
-    	wynik2 = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
-		int callsLag = wynik2.f_calls;
-		string czyGlobalne = (wynik.x(0) > 53.0) ? "globalne" : "lokalne";
-    	cout << i + 1 << ';'
-         << x0 << ';'
-         << double_to_string_comma(res[0]) << ';'
-         << double_to_string_comma(res[1]) << ';'
-		 << callsExp<< ';'
-         << wynik.x << ' '
-         << wynik.y<< ' '
-		 << callsFib<< ';'
-		 << czyGlobalne << ';'
-         << wynik2.x << ' '
-         << wynik2.y << ' '
-		 << callsLag<< ';'
-		 << czyGlobalne << '\n';
+			solution::clear_calls();
+			x0 = rand() % 200-99;
+			res = expansion(ff1T, x0, d, alpha, Nmax,lb,ub);
+			int callsExp = solution::f_calls;
+			solution::clear_calls();
+			wynik = fib(ff1T, res[0], res[1], epsilon);
+			int callsFib = wynik.f_calls;
+			solution::clear_calls();
+			wynik2 = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+			int callsLag = wynik2.f_calls;
+			string czyGlobalne = (wynik.x(0) > 53.0) ? "globalne" : "lokalne";
+			cout << i + 1 << ';'
+			<< x0 << ';'
+			<< double_to_string_comma(res[0]) << ';'
+			<< double_to_string_comma(res[1]) << ';'
+			<< callsExp<< ';'
+			<< wynik.x << ' '
+			<< wynik.y<< ' '
+			<< callsFib<< ';'
+			<< czyGlobalne << ';'
+			<< wynik2.x << ' '
+			<< wynik2.y << ' '
+			<< callsLag<< ';'
+			<< czyGlobalne << '\n';
 
-    	Sout << i + 1 << ';'
-         << x0 << ';'
-         << double_to_string_comma(res[0]) << ';'
-         << double_to_string_comma(res[1]) << ';'
-		 << callsExp<< ';'
-         << wynik.x << ' '
-         << wynik.y<< ' '
-		 << callsFib<< ';'
-		<< czyGlobalne << ';'
-         << wynik2.x << ' '
-         << wynik2.y << ' '
-		 << callsLag<< ';'
-		 << czyGlobalne << '\n';
+			Sout << i + 1 << ';'
+			<< x0 << ';'
+			<< double_to_string_comma(res[0]) << ';'
+			<< double_to_string_comma(res[1]) << ';'
+			<< callsExp<< ';'
+			<< wynik.x << ' '
+			<< wynik.y<< ' '
+			<< callsFib<< ';'
+			<< czyGlobalne << ';'
+			<< wynik2.x << ' '
+			<< wynik2.y << ' '
+			<< callsLag<< ';'
+			<< czyGlobalne << '\n';
 		}
 	}
 	Sout.close();
@@ -142,30 +142,17 @@ void lab1()
 	
 	double* p = new double[2];
 	p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
-	//cout << p[0] << endl;
-	//cout << p[1] << endl;					// dolne oraz górne ograniczeni							// dok³adne rozwi¹zanie optymalne
-	solution opt;		// rozwi¹zanie optymalne znalezione przez algorytm
-	opt = fib(ff1T, p[0],p[1], epsilon, lb, ub);			// wywo³anie procedury optymalizacji
+	solution opt;
+	opt = fib(ff1T, p[0],p[1], epsilon, lb, ub);
 	cout << opt << endl << endl;
-	//solution opt1;		// rozwi¹zanie optymalne znalezione przez algorytm
-	//opt1 = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax, lb, ub);			// wywo³anie procedury optymalizacji
-	//cout << opt1 << endl << endl;// wypisanie wyniku
-	// double* oge = new double[2];
-	// oge = expansion(ff1R, 0.005, 0.002, 1.5, Nmax);
-	// solution opt2;
-	// opt2 = fib(ff1R, 0.0001, 0.01, epsilon);
-	// cout << opt2 << endl << endl;
-	// cout<<opt2.x<<endl;
-
 	matrix Y0 = matrix(3,1);
 	Y0(0)=5.0;	//objętość zbiornika a
 	Y0(1)=1.0;	//objętość zbiornika b
 	Y0(2)=20.0;	//temperatura zbiornika b
 	matrix ud1(1, 1), ud2;
 	ud1(0) = 0.002;
-	// use df1 (3-variable model) — df0 is for the 2-variable pendulum model
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
-	ofstream Sout2("data/results/symulacja_lab1.csv");					// definiujemy strumieñ do pliku .csv
+	ofstream Sout2("data/results/symulacja_lab1.csv");		// definiujemy strumieñ do pliku .csv
 	Sout2 << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
 	Sout2.close();											// zamykamy strumieñ
 	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
