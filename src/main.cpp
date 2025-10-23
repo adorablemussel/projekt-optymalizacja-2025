@@ -9,6 +9,7 @@ Data ostatniej modyfikacji: 30.09.2025
 *********************************************/
 
 #include "../include/opt_alg.h"
+#include <ctime>
 
 
 std::string double_to_string_comma(double x, int precision = 6) {
@@ -33,6 +34,8 @@ int main()
 {
 	try
 	{
+		srand((unsigned)time(nullptr));
+
 		// lab0();
 		lab1();
 	}
@@ -81,7 +84,7 @@ void lab0()
 void lab1()
 {
 	//funkcja testowa
-	std::ofstream Sout("data/results/symulacja_lab1_testowa.csv");
+	std::ofstream Sout1("data/results/symulacja_lab1_testowa.csv");
 
 	double* res = new double[2] { 0.f, 0.f };
 	matrix lb(-100), ub(100);
@@ -94,8 +97,8 @@ void lab1()
 	solution wynikFib, wynikLag;
 
 	for(int j=0;j<3;j++){
-		alpha = (rand() % 200+100)/100.0;
-		Sout << "\n\n\nWspolczynnik ekspansji: " << alpha << '\n'
+		alpha = (rand() % 200+100)/100.0;					//wspolczynnik ekspansji od 1.0 do 3.0
+		Sout1 << "\n\n\nWspolczynnik ekspansji: " << alpha << '\n'
 		<< "Lp.;x(0);a;b;fcalls_Eksp;x*_Fib;y*_Fib;fcalls_Fib;Minimum lokalne/globalne;x*_Lagr;y*_Lagr;fcalls_Lagr;Minimum lokalne/globalne\n\n";
 		
 		for (int i = 0; i < 100; i++)
@@ -119,31 +122,31 @@ void lab1()
 			<< double_to_string_comma(res[0]) << ';'
 			<< double_to_string_comma(res[1]) << ';'
 			<< callsExp<< ';'
-			<< wynikFib.x << ' '
-			<< wynikFib.y<< ' '
+			<< m2d(wynikFib.x) << ';'
+			<< m2d(wynikFib.y) << ';'
 			<< callsFib<< ';'
 			<< czyGlobalne << ';'
-			<< wynikLag.x << ' '
-			<< wynikLag.y << ' '
+			<< m2d(wynikLag.x) << ';'
+			<< m2d(wynikLag.y) << ';'
 			<< callsLag<< ';'
 			<< czyGlobalne << '\n';
 
-			Sout << i + 1 << ';'
+			Sout1 << i + 1 << ';'
 			<< x0 << ';'
 			<< double_to_string_comma(res[0]) << ';'
 			<< double_to_string_comma(res[1]) << ';'
 			<< callsExp<< ';'
-			<< wynikFib.x << ' '
-			<< wynikFib.y<< ' '
+			<< m2d(wynikFib.x) << ';'
+			<< m2d(wynikFib.y) << ';'
 			<< callsFib<< ';'
 			<< czyGlobalne << ';'
-			<< wynikLag.x << ' '
-			<< wynikLag.y << ' '
+			<< m2d(wynikLag.x) << ';'
+			<< m2d(wynikLag.y) << ';'
 			<< callsLag<< ';'
 			<< czyGlobalne << '\n';
 		}
 	}
-	Sout.close();
+	Sout1.close();
 
 	/*
 	//problem rzeczywisty
