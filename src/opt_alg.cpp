@@ -1,4 +1,4 @@
-#include"opt_alg.h"
+#include"../include/opt_alg.h"
 
 solution MC(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
@@ -39,15 +39,19 @@ solution MC(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, do
 
 double* expansion(matrix(ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1, matrix ud2)
 {
+	// Zmienne wejsciowe:
+	// ff - wskaznik do funkcji celu
+	// x0 - punkt startowy
+	// d - krok poczatkowy
+	// alpha - wspolczynnik ekspansji
+	// Nmax - maksymalna liczba iteracji
+	// ud1, ud2 - user data
 	try
 	{
 		double *p = new double[2] { 0, 0 };
 		double x1 = x0 + d;
 		int i = 0;
-		int fcalls = 0;
-		//cout << ff(5.0, ud1, ud2) << endl;
-		//cout << ff(4.0, ud1, ud2) << endl;
-		//cout << ff(-0.00327869, ud1, ud2) << endl;
+		solution::clear_calls();
 		if (ff(x0, ud1, ud2) == ff(x1, ud1, ud2))
 		{
 			p[0] = x0;
@@ -67,11 +71,11 @@ double* expansion(matrix(ff)(matrix, matrix, matrix), double x0, double d, doubl
 		}
 		double xi = x1;
 		double xi_next = 0.0;
-		while (fcalls <= Nmax)
+		while (solution::f_calls <= Nmax)
 		{
 			i++;
 			xi_next = x0 + pow(alpha, i) * d;
-			fcalls++;
+			solution::f_calls++;
 
 			if (ff(xi, ud1, ud2) <= ff(xi_next, ud1, ud2))
 			{

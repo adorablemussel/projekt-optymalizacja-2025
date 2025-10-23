@@ -1,4 +1,7 @@
-#include"user_funs.h"
+#include"../include/user_funs.h"
+
+#define PI 3.141592653589793
+#define E 2.718281828459045
 
 matrix ff0T(matrix x, matrix ud1, matrix ud2)				// funkcja celu dla przypadku testowego
 {
@@ -24,12 +27,22 @@ matrix ff0R(matrix x, matrix ud1, matrix ud2)				// funkcja celu dla problemu rz
 	return y;
 }
 
+matrix df0(double t, matrix Y, matrix ud1, matrix ud2)
+{
+	matrix dY(2, 1);										// definiujemy wektor pochodnych szukanych funkcji
+	double m = 1, l = 0.5, b = 0.5, g = 9.81;				// definiujemy parametry modelu
+	double I = m * pow(l, 2);
+	dY(0) = Y(1);																// pochodna z po³o¿enia to prêdkoœæ
+	dY(1) = ((t <= ud2(1)) * ud2(0) - m * g * l * sin(Y(0)) - b * Y(1)) / I;	// pochodna z prêdkoœci to przyspieszenie
+	return dY;
+}
+
 matrix ff1T(matrix x, matrix ud1, matrix ud2)
 {
-	matrix y;
-	y = -cos(0.1 * x(0)) * exp(-(0.1 * x(0) - 2 * 3.14) * (0.1 * x(0) - 2 * 3.14)) + 0.002 * (0.1 * x(0) * (0.1 * x(0)));
+		matrix y;
+		y = -cos(0.1 * x(0)) * pow(E,-(pow((0.1 * x(0) - 2 * PI), 2))) + 0.002 * pow(0.1 * x(0), 2);
+		return y;
 
-	return y;
 }
 
 matrix ff1R(matrix x, matrix ud1, matrix ud2)
@@ -86,12 +99,3 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
 	return dY;
 }
 
-matrix df0(double t, matrix Y, matrix ud1, matrix ud2)
-{
-	matrix dY(2, 1);										// definiujemy wektor pochodnych szukanych funkcji
-	double m = 1, l = 0.5, b = 0.5, g = 9.81;				// definiujemy parametry modelu
-	double I = m * pow(l, 2);
-	dY(0) = Y(1);																// pochodna z po³o¿enia to prêdkoœæ
-	dY(1) = ((t <= ud2(1)) * ud2(0) - m * g * l * sin(Y(0)) - b * Y(1)) / I;	// pochodna z prêdkoœci to przyspieszenie
-	return dY;
-}

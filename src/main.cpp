@@ -8,7 +8,7 @@ Akademia Górniczo-Hutnicza
 Data ostatniej modyfikacji: 30.09.2025
 *********************************************/
 
-#include "opt_alg.h"
+#include "../include/opt_alg.h"
 
 
 std::string double_to_string_comma(double x, int precision = 6) {
@@ -80,44 +80,51 @@ void lab0()
 
 void lab1()
 {
-	std::ofstream Sout("data/results/symulacja_lab1.csv");
-	//zadanie teoretyczne
+	//funkcja testowa
+	std::ofstream Sout("data/results/symulacja_lab1_testowa.csv");
 
 	double* res = new double[2] { 0.f, 0.f };
 	matrix lb(-100), ub(100);
-	double x0, d = 5, alpha = 1.5;
+	double x0;
+	double d = 5.0;
+	double alpha;
 	double epsilon = 1e-2;
 	double gamma = 1e-6;
 	int Nmax = 10000;
-	solution wynik,wynik2;
+	solution wynikFib, wynikLag;
+
 	for(int j=0;j<3;j++){
 		alpha = (rand() % 200+100)/100.0;
 		Sout << "\n\n\nWspolczynnik ekspansji: " << alpha << '\n'
 		<< "Lp.;x(0);a;b;fcalls_Eksp;x*_Fib;y*_Fib;fcalls_Fib;Minimum lokalne/globalne;x*_Lagr;y*_Lagr;fcalls_Lagr;Minimum lokalne/globalne\n\n";
+		
 		for (int i = 0; i < 100; i++)
 		{
 			solution::clear_calls();
-			x0 = rand() % 200-99;
-			res = expansion(ff1T, x0, d, alpha, Nmax,lb,ub);
+			x0 = rand() % 201-100;
+			res = expansion(ff1T, x0, d, alpha, Nmax, lb, ub);
 			int callsExp = solution::f_calls;
+			
 			solution::clear_calls();
-			wynik = fib(ff1T, res[0], res[1], epsilon);
-			int callsFib = wynik.f_calls;
+			wynikFib = fib(ff1T, res[0], res[1], epsilon);
+			int callsFib = wynikFib.f_calls;
+			
 			solution::clear_calls();
-			wynik2 = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
-			int callsLag = wynik2.f_calls;
-			string czyGlobalne = (wynik.x(0) > 53.0) ? "globalne" : "lokalne";
+			wynikLag = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+			int callsLag = wynikLag.f_calls;
+			string czyGlobalne = (wynikFib.x(0) > 53.0) ? "globalne" : "lokalne";
+
 			cout << i + 1 << ';'
 			<< x0 << ';'
 			<< double_to_string_comma(res[0]) << ';'
 			<< double_to_string_comma(res[1]) << ';'
 			<< callsExp<< ';'
-			<< wynik.x << ' '
-			<< wynik.y<< ' '
+			<< wynikFib.x << ' '
+			<< wynikFib.y<< ' '
 			<< callsFib<< ';'
 			<< czyGlobalne << ';'
-			<< wynik2.x << ' '
-			<< wynik2.y << ' '
+			<< wynikLag.x << ' '
+			<< wynikLag.y << ' '
 			<< callsLag<< ';'
 			<< czyGlobalne << '\n';
 
@@ -126,20 +133,20 @@ void lab1()
 			<< double_to_string_comma(res[0]) << ';'
 			<< double_to_string_comma(res[1]) << ';'
 			<< callsExp<< ';'
-			<< wynik.x << ' '
-			<< wynik.y<< ' '
+			<< wynikFib.x << ' '
+			<< wynikFib.y<< ' '
 			<< callsFib<< ';'
 			<< czyGlobalne << ';'
-			<< wynik2.x << ' '
-			<< wynik2.y << ' '
+			<< wynikLag.x << ' '
+			<< wynikLag.y << ' '
 			<< callsLag<< ';'
 			<< czyGlobalne << '\n';
 		}
 	}
 	Sout.close();
 
-	//Funkcja testowa
-	
+	/*
+	//problem rzeczywisty
 	double* p = new double[2];
 	p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
 	solution opt;
@@ -158,7 +165,7 @@ void lab1()
 	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
 	Y[1].~matrix();
 	solution xd=0.005;
-
+	*/
 }
 
 void lab2()
