@@ -115,7 +115,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			fib_seq.push_back(fib_seq[fib_seq.size() - 1] + fib_seq[fib_seq.size() - 2]);
 		}
 		int k = fib_seq.size()-1;
-		cout << "Liczba iteracji: " << k <<" "<<fib_seq.back()<<" "<<(B.x(0) - A.x(0)) / epsilon<< endl;
+		//cout << "Liczba iteracji: " << k <<" "<<fib_seq.back()<<" "<<(B.x(0) - A.x(0)) / epsilon<< endl;
 		C.x(0) = B.x(0) - (fib_seq[k - 1] / fib_seq[k]) * (B.x(0) - A.x(0));
 		D.x(0) = A.x(0) + B.x(0) - C.x(0);
 		C.fit_fun(ff);
@@ -194,11 +194,13 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				B.fit_fun(ff);
 			}
 			else {
+				std::cerr << "Punkt D jest poza zakresem." << std::endl;
 				Xopt.flag = 0;
 				break;
 			}
 			i++;
 			if (i > Nmax) {
+				std::cerr << "Osiagnieto limit iteracji petli." << std::endl;
 				Xopt.flag = 0;
 				break;
 			}

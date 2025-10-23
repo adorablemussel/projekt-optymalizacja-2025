@@ -97,7 +97,7 @@ void lab1()
 	solution wynikFib, wynikLag;
 
 	for(int j=0;j<3;j++){
-		alpha = (rand() % 200+100)/100.0;					//wspolczynnik ekspansji od 1.0 do 3.0
+		alpha = (rand() %100+100)/100.0;
 		Sout1 << "\n\n\nWspolczynnik ekspansji: " << alpha << '\n'
 		<< "Lp.;x(0);a;b;fcalls_Eksp;x*_Fib;y*_Fib;fcalls_Fib;Minimum lokalne/globalne;x*_Lagr;y*_Lagr;fcalls_Lagr;Minimum lokalne/globalne\n\n";
 		
@@ -117,31 +117,31 @@ void lab1()
 			int callsLag = wynikLag.f_calls;
 			string czyGlobalne = (wynikFib.x(0) > 53.0) ? "globalne" : "lokalne";
 
-			cout << i + 1 << ';'
-			<< x0 << ';'
-			<< double_to_string_comma(res[0]) << ';'
-			<< double_to_string_comma(res[1]) << ';'
-			<< callsExp<< ';'
-			<< m2d(wynikFib.x) << ';'
-			<< m2d(wynikFib.y) << ';'
-			<< callsFib<< ';'
-			<< czyGlobalne << ';'
-			<< m2d(wynikLag.x) << ';'
-			<< m2d(wynikLag.y) << ';'
-			<< callsLag<< ';'
-			<< czyGlobalne << '\n';
+			// cout << i + 1 << ';'
+			// << x0 << ';'
+			// << double_to_string_comma(res[0]) << ';'
+			// << double_to_string_comma(res[1]) << ';'
+			// << callsExp<< ';'
+			// << wynikFib.x << ' '
+			// << wynikFib.y << ' '
+			// << callsFib<< ';'
+			// << czyGlobalne << ';'
+			// << wynikLag.x << ' '
+			// << wynikLag.y << ' '
+			// << callsLag<< ';'
+			// << czyGlobalne << '\n';
 
 			Sout1 << i + 1 << ';'
 			<< x0 << ';'
 			<< double_to_string_comma(res[0]) << ';'
 			<< double_to_string_comma(res[1]) << ';'
 			<< callsExp<< ';'
-			<< m2d(wynikFib.x) << ';'
-			<< m2d(wynikFib.y) << ';'
+			<< wynikFib.x << ' '
+			<< wynikFib.y << ' '
 			<< callsFib<< ';'
 			<< czyGlobalne << ';'
-			<< m2d(wynikLag.x) << ';'
-			<< m2d(wynikLag.y) << ';'
+			<< wynikLag.x << ' '
+			<< wynikLag.y << ' '
 			<< callsLag<< ';'
 			<< czyGlobalne << '\n';
 		}
