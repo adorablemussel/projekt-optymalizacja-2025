@@ -36,7 +36,7 @@ int main()
 	{
 		srand((unsigned)time(nullptr));
 
-		// lab0();
+		//lab0();
 		lab1();
 	}
 	catch (string EX_INFO)
@@ -160,7 +160,7 @@ void lab1()
 	Y0(1)=1.0;	//objętość zbiornika b
 	Y0(2)=20.0;	//temperatura zbiornika b
 	matrix ud1(1, 1), ud2;
-	ud1(0) = 0.002;
+	ud1(0) = 0.005;
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
 	ofstream Sout2("data/results/symulacja_lab1_rzeczywisty.csv");		// definiujemy strumieñ do pliku .csv
 	Sout2 << "t(s); V(A); V(B); temp(B);\n\n";

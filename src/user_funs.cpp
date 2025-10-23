@@ -75,8 +75,8 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
 	double a = 0.98;
 	double b = 0.63; 
 	double g = 9.81; // zmiana objętości wody w zbiorniku
-	double PA = 0.5;
-	double TA = 90.0; // zbiornik a
+	double PA = 2.0;
+	double TA = 95.0; // zbiornik a
 	double PB = 1.0; // zbiornik b
 	double Tin = 20.0;
 	double Fin = 0.01; // wlewanie do zbiornika b F in = 10 litrów/s
