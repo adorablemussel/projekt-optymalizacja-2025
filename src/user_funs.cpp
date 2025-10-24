@@ -49,9 +49,9 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 {
 	matrix y;
 	matrix Y0(3,1);
-	Y0(0)=5.0;	//objętość zbiornika a
-	Y0(1)=1.0;	//objętość zbiornika b
-	Y0(2)=20.0;	//temperatura zbiornika b
+	Y0(0)=5.0;				//objętość zbiornika a
+	Y0(1)=1.0;				//objętość zbiornika b
+	Y0(2)=20.0;				//temperatura zbiornika b
 	matrix data(1,1);
 	data(0)=m2d(x);
 	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, data, ud2);
@@ -73,21 +73,17 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
 {
 	matrix dY(3,1);
-	double a = 0.98;
-	double b = 0.63; 
-	double g = 9.81; // zmiana objętości wody w zbiorniku
-	double PA = 2.0;
-	double TA = 95.0; // zbiornik a
-	double PB = 1.0; // zbiornik b
-	double Tin = 20.0;
-	double Fin = 0.01; // wlewanie do zbiornika b F in = 10 litrów/s
-	//double db = 36.5665; // przekrój otwóru wylewającej się wody
-	//double da = 50.0;
-	//db=db*1e-4;
-	//double da=ud2(0) * 1e-4;
-	double DB = 0.00365665;
-	double DA = m2d(ud1);
-	double VA=Y(0);
+	double a = 0.98; 		// współczynnik wypływu
+	double b = 0.63; 		// współczynnik wypływu
+	double g = 9.81; 		// przyspieszenie ziemskie
+	double PA = 2.0; 		// ciśnienie w zbiorniku a
+	double TA = 95.0; 		// temperatura w zbiorniku a
+	double PB = 1.0; 		// ciśnienie w zbiorniku b
+	double Tin = 20.0;		// temperatura dopływającej cieczy
+	double Fin = 0.01;		// przepływ dopływającej cieczy
+	double DB = 0.00365665;	// gęstość cieczy w zbiorniku b
+	double DA = m2d(ud1);	// gęstość cieczy w zbiorniku a
+	double VA=Y(0);	
 	double VB=Y(1);
 	double TB=Y(2);
 
