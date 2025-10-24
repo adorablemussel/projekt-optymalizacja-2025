@@ -52,8 +52,9 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 	Y0(0)=5.0;	//objętość zbiornika a
 	Y0(1)=1.0;	//objętość zbiornika b
 	Y0(2)=20.0;	//temperatura zbiornika b
-	ud1(0) = m2d(x);
-	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
+	matrix data(1,1);
+	data(0)=m2d(x);
+	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, data, ud2);
 	int n = get_len(Y[0]);
 	double maxT_B = Y[1](0,2);
 	for(int i=1;i<n;i++)
@@ -63,7 +64,7 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 			maxT_B=Y[1](i,2);			
 		}
 	}
-	y=abs(maxT_B - m2d(ud1));
+	y=fabs(maxT_B - 50);
 	Y[0].~matrix();											
 	Y[1].~matrix();
 	return y;
@@ -85,7 +86,7 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
 	//db=db*1e-4;
 	//double da=ud2(0) * 1e-4;
 	double DB = 0.00365665;
-	double DA = ud1(0);
+	double DA = m2d(ud1);
 	double VA=Y(0);
 	double VB=Y(1);
 	double TB=Y(2);

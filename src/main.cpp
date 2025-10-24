@@ -92,7 +92,7 @@ void lab1()
 	double d = 5.0;
 	double alpha;
 	double epsilon = 1e-2;
-	double gamma = 1e-6;
+	double gamma = 1e-4;
 	int Nmax = 10000;
 	solution wynikFib, wynikLag;
 
@@ -150,25 +150,43 @@ void lab1()
 
 	
 	//problem rzeczywisty
-	double* p = new double[2];
-	p = expansion(ff1T, 53.0, 1.0, 2.0, Nmax, lb, ub);
-	solution opt;
-	opt = fib(ff1T, p[0],p[1], epsilon, lb, ub);
+	epsilon = 1e-5;
+	gamma = 1e-6;
+	double a_start = 0.0001;// przedział zrobiony w m^2 dlatego epsilon i gamma takie duże żeby precyzja nie uproszczała za bardzo wyniku
+    double b_start = 0.01;
+	Nmax = 500;
+	solution::clear_calls();
+	solution opt = fib(ff1R, a_start, b_start, epsilon);// optymalizacja fibonacim
 	cout << opt << endl << endl;
+	solution::clear_calls();
+	solution opt1 = lag(ff1R, a_start, b_start, epsilon, gamma, Nmax);// optymalizacja lag
+	cout << opt1 << endl << endl;
 	matrix Y0 = matrix(3,1);
 	Y0(0)=5.0;	//objętość zbiornika a
 	Y0(1)=1.0;	//objętość zbiornika b
-	Y0(2)=20.0;	//temperatura zbiornika b
-	matrix ud1(1, 1), ud2;
-	ud1(0) = 0.005;
-	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1, ud2);
+	Y0(2)=20.0;	 //temperatura zbiornika b
+	matrix ud1(1, 1);
+	ud1(0) = m2d(opt.x);
+	cout<<m2d(opt.x)<<endl;
+	cout<<m2d(opt.y) + 50.0 << endl;
+	matrix* Y = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1);
 	ofstream Sout2("data/results/symulacja_lab1_rzeczywisty.csv");		// definiujemy strumieñ do pliku .csv
 	Sout2 << "t(s); V(A); V(B); temp(B);\n\n";
 	Sout2 << hcat(Y[0], Y[1]);								// zapisyjemy wyniki w pliku
 	Sout2.close();											// zamykamy strumieñ
 	Y[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
 	Y[1].~matrix();
-	solution xd=0.005;
+
+	ud1(0) = m2d(opt1.x);
+	cout<<m2d(opt1.x)<<endl;
+	cout<<m2d(opt1.y) + 50.0 << endl;
+	matrix* Y1 = solve_ode(df1, 0.0, 1.0, 2000.0, Y0, ud1);
+	ofstream Sout3("data/results/symulacja_lab1_rzeczywisty1.csv");		// definiujemy strumieñ do pliku .csv
+	Sout3 << "t(s); V(A); V(B); temp(B);\n\n";
+	Sout3 << hcat(Y1[0], Y1[1]);								// zapisyjemy wyniki w pliku
+	Sout3.close();											// zamykamy strumieñ
+	Y1[0].~matrix();											// usuwamy z pamiêci rozwi¹zanie RR
+	Y1[1].~matrix();
 	
 }
 

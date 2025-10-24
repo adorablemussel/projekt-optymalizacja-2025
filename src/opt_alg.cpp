@@ -37,64 +37,63 @@ solution MC(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, do
 	}
 }
 
-double* expansion(matrix(ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1, matrix ud2)
+double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1, matrix ud2)
 {
-	// Zmienne wejsciowe:
-	// ff - wskaznik do funkcji celu
-	// x0 - punkt startowy
-	// d - krok poczatkowy
-	// alpha - wspolczynnik ekspansji
-	// Nmax - maksymalna liczba iteracji
-	// ud1, ud2 - user data
 	try
 	{
-		double *p = new double[2] { 0, 0 };
-		double x1 = x0 + d;
-		int i = 0;
-		solution::clear_calls();
-		if (ff(x0, ud1, ud2) == ff(x1, ud1, ud2))
+		double* p = new double[2] { 0, 0 };
+
+		solution x1(x0);
+		solution x2(x0 + d);
+
+		x1.fit_fun(ff, ud1, ud2);
+		x2.fit_fun(ff, ud1, ud2);
+
+		if (solution::f_calls >= Nmax)
 		{
-			p[0] = x0;
-			p[1] = x1;
+			p[0] = m2d(x1.x);
+			p[1] = m2d(x2.x);
+			if (p[0] > p[1]) std::swap(p[0], p[1]);
 			return p;
 		}
-		if (ff(x1, ud1, ud2) > ff(x0, ud1, ud2))
+
+		if (m2d(x1.y) <= m2d(x2.y))
 		{
 			d = -d;
-			x1 = x0 + d;
-			if (ff(x1, ud1, ud2) >= ff(x0, ud1, ud2))
-			{
-				p[0] = x1;
-				p[1] = x0 - d;
-				return p;
-			}
+			std::swap(x1, x2);
 		}
-		double xi = x1;
-		double xi_next = 0.0;
-		while (solution::f_calls <= Nmax)
+
+		while (true)
 		{
-			i++;
-			xi_next = x0 + pow(alpha, i) * d;
-			solution::f_calls++;
+			solution x3(m2d(x2.x) + d);
+			x3.fit_fun(ff, ud1, ud2);
 
-			if (ff(xi, ud1, ud2) <= ff(xi_next, ud1, ud2))
+			//Sprawdzenie, czy "przeskoczyliśmy" minimum
+			if (m2d(x3.y) > m2d(x2.y))
 			{
-				if (d > 0)
-				{
-					p[0] = x0 + pow(alpha, i - 1) * d;
-					p[1] = xi_next;
-				}
-				else
-				{
-					p[0] = xi_next;
-					p[1] = x0 + pow(alpha, i - 1) * d;
-				}
-				return p;
+				// Znaleziono przedział. Minimum jest między x1 a x3.
+				p[0] = m2d(x1.x);
+				p[1] = m2d(x3.x);
+				// Porządkowanie wyniku, aby p[0] < p[1]
+				if (p[0] > p[1]) std::swap(p[0], p[1]);
+				break;
 			}
-			xi = xi_next;
 
+			// Sprawdzenie warunku stopu
+			if (solution::f_calls >= Nmax)
+			{
+				// Zwracamy najlepszy znaleziony dotąd przedział
+				p[0] = m2d(x1.x);
+				p[1] = m2d(x2.x);
+				if (p[0] > p[1]) std::swap(p[0], p[1]);
+				break;
+			}
+
+			// Przejście do następnej iteracji
+			x1 = x2;
+			x2 = x3;
+			d *= alpha; // Zwiększenie kroku
 		}
-
 
 		return p;
 	}
