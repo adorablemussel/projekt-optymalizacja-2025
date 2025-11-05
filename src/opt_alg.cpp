@@ -228,6 +228,7 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		solution xb = x0;
 
 
 		return Xopt;
@@ -243,6 +244,36 @@ solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, ma
 	try
 	{
 		//Tu wpisz kod funkcji
+		int n = 2; 				//liczba współrzędnych
+		matrix X_try = XB.x;
+		matrix Y_try;
+		
+		for (int j = 0; j < n; j++){	//j to aktualna współrzędna czyli 0 = poziom, 1 = pion
+			// dla +s
+			X_try = XB.x;
+			X_try(0, j) += s;
+			Y_try = ff(X_try, ud1, ud2);
+			XB.f_calls++;
+
+			if(Y_try < XB.y(0,0)){
+				XB.x = X_try;
+				XB.y = Y_try;
+			} 
+			else {
+
+				// dla -s
+				X_try = XB.x; // reset
+				X_try(0, j) -= s;
+				Y_try = ff(X_try, ud1, ud2);
+				XB.f_calls++;
+				
+				if(Y_try < XB.y(0,0)){
+					XB.x = X_try;
+					XB.y = Y_try;
+				}
+			}
+
+		}
 
 		return XB;
 	}

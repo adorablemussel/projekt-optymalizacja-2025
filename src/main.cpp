@@ -193,15 +193,32 @@ void lab1()
 
 void lab2()
 {
+	// testy
 	matrix x = matrix(1, 2, 0.0);
-	double x_x = -1.0;	// ustawienie pierwszej współrzędnej punktu x(0,0)
-	double x_y = 0.5;	// ustawienie drugiej współrzędnej punktu x(0,1)
-	x.set_col(x_x, 0);
-	x.set_col(x_y, 1);
+	double x_1 = -1.0;				//pierwsza współrzędna (oś x)
+	double x_2 = 0.5;				//druga współrzędna (oś y)
+	x(0, 0) = x_1;
+	x(0, 1) = x_2;
 
-	cout << x(0,0) << endl;
-	cout << x(0,1) << endl;
-	cout << ff2T(x) << endl;
+	cout << "x = " << x << endl;
+	cout << "f(x) = " << ff2T(x, matrix(), matrix()) << endl;
+
+	double testS = 0.2;				//testowy krok
+	matrix ud1, ud2; //puste
+
+	solution xb;					//x początkowy (z dwoma współrzędnymi i wartoscia)
+	xb.x = x;
+	xb.y = ff2T(x, ud1, ud2);
+
+	solution testHJ;
+	testHJ = HJ_trial(ff2T, xb, testS, ud1, ud2);
+
+	cout << "Wynik HJ_trial:" << endl;
+	cout << "x = " << testHJ.x << endl;
+	cout << "y = " << testHJ.y << endl;
+	cout << "f_calls = " << solution::f_calls << endl;
+	// koniec testów
+
 
 }
 

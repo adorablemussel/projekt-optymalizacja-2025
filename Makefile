@@ -1,7 +1,7 @@
 CPPCOMP = g++
 DEBUGGER = gdb
-OPT = -O3
-#OPT = -g
+#OPT = -O3
+OPT = -g
 
 SRC_DIR = src
 INCLUDE_DIR = include
