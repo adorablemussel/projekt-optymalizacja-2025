@@ -228,9 +228,60 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
-		solution xb = x0;
+		solution X, XB, Xold;
 
+		XB.x = x0;
+		XB.y = ff(x0, ud1, ud2);
+		solution::f_calls++;
 
+		int fcalls = 1;
+
+		do
+		{
+			X = HJ_trial(ff, XB, s, ud1, ud2);
+			fcalls += (int)X.f_calls;
+
+			if (X.y(0, 0) < XB.y(0, 0))
+			{
+				do
+				{
+					Xold = XB;
+					XB = X;
+
+					//ruch wzorcowy
+					X.x = 2 * XB.x - Xold.x;
+					X.y = ff(X.x, ud1, ud2);
+					solution::f_calls++;
+					fcalls++;
+
+					//sprawdzamy wokół nowego punktu
+					X = HJ_trial(ff, X, s, ud1, ud2);
+					fcalls++;
+
+					if (fcalls > Nmax)
+					{
+						XB.flag = -1; // jak przekroczono limit
+						return XB;
+					}
+				} while (X.y(0, 0) < XB.y(0, 0));
+
+				X = XB; // cofnięcie do najlepszego punktu
+			}
+			else
+			{
+				s *= alpha; // zmniejszenie kroku
+			}
+
+			if (fcalls > Nmax)
+			{
+				XB.flag = -1;
+				return XB;
+			}
+
+		} while (s > epsilon);
+
+		XB.flag = 1; // sukces
+		Xopt = XB;
 		return Xopt;
 	}
 	catch (string ex_info)
