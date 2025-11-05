@@ -37,7 +37,8 @@ int main()
 		srand((unsigned)time(nullptr));
 
 		//lab0();
-		lab1();
+		//lab1();
+		lab2();
 	}
 	catch (string EX_INFO)
 	{
@@ -192,6 +193,15 @@ void lab1()
 
 void lab2()
 {
+	matrix x = matrix(1, 2, 0.0);
+	double x_x = -1.0;	// ustawienie pierwszej współrzędnej punktu x(0,0)
+	double x_y = 0.5;	// ustawienie drugiej współrzędnej punktu x(0,1)
+	x.set_col(x_x, 0);
+	x.set_col(x_y, 1);
+
+	cout << x(0,0) << endl;
+	cout << x(0,1) << endl;
+	cout << ff2T(x) << endl;
 
 }
 

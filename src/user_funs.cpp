@@ -96,3 +96,6 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
 	return dY;
 }
 
+matrix ff2T(matrix x, matrix ud1, matrix ud2){
+	return x(0,0)*x(0,0) + x(0,1)*x(0,1) - cos(2.5*PI*x(0,0)) - cos(2.5*PI*x(0,1)) + 2;
+}
