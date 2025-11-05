@@ -193,6 +193,7 @@ void lab1()
 
 void lab2()
 {
+/*
 	// testy
 	matrix x = matrix(1, 2, 0.0);
 	double x_1 = -1.0;				//pierwsza współrzędna (oś x)
@@ -233,8 +234,85 @@ void lab2()
 	cout << "y = " << testHJ.y << endl;
 	cout << "f_calls = " << solution::f_calls << endl;
 	// koniec testów
+*/
+	// testowa funkcja celu
+	solution::clear_calls();
+	matrix x0 = matrix(1, 2, 0.0);
+	matrix ud1, ud2;
+	double s1, s2, s3;
+	double alpha = 0.6;
+	double epsilon = 1e-5;
+	double Nmax = 1000;
+	solution HJ1;
 
+	s1 = 1.24;
+	for (int i = 0; i < 100; i++){
+		solution::clear_calls();
+		cout << "Optymalizacja nr " << i + 1 << endl;
+		x0(0, 0) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
+		x0(0, 1) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
+		cout << "	Wspolrzedne poczatkowe: " << "(" << x0(0,0) << ", " << x0(0,1) << ")" << endl;
+		cout << "	Poczatkowa wartosc funkcji: " << ff2T(x0, ud1, ud2) << endl;
+		cout << endl;
 
+		HJ1 = HJ(ff2T, x0, s1, alpha, epsilon, Nmax, ud1, ud2);
+		cout << "	Wspolrzedne koncowe: " << "(" << HJ1.x << ")" << endl;
+		cout << "	Koncowa wartosc funkcji: " << HJ1.y << endl;
+		if ( HJ1.y < 0.01 && HJ1.y > -0.01){
+			cout << "	Minimum globalne" << endl;
+		}
+		else {
+			cout << "	Minimum lokalne" << endl;
+		}
+		cout << "f_calls = " << solution::f_calls << endl;
+		cout << endl;
+	}
+
+	s2 = 0.76;
+	for (int i = 0; i < 100; i++){
+		solution::clear_calls();
+		cout << "Optymalizacja nr " << i + 1 << endl;
+		x0(0, 0) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
+		x0(0, 1) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
+		cout << "	Wspolrzedne poczatkowe: " << "(" << x0(0,0) << ", " << x0(0,1) << ")" << endl;
+		cout << "	Poczatkowa wartosc funkcji: " << ff2T(x0, ud1, ud2) << endl;
+		cout << endl;
+
+		HJ1 = HJ(ff2T, x0, s2, alpha, epsilon, Nmax, ud1, ud2);
+		cout << "	Wspolrzedne koncowe: " << "(" << HJ1.x << ")" << endl;
+		cout << "	Koncowa wartosc funkcji: " << HJ1.y << endl;
+		if ( HJ1.y < 0.01 && HJ1.y > -0.01){
+			cout << "	Minimum globalne" << endl;
+		}
+		else {
+			cout << "	Minimum lokalne" << endl;
+		}
+		cout << "f_calls = " << solution::f_calls << endl;
+		cout << endl;
+	}
+
+	s3 = 0.32;
+	for (int i = 0; i < 100; i++){
+		solution::clear_calls();
+		cout << "Optymalizacja nr " << i + 1 << endl;
+		x0(0, 0) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
+		x0(0, 1) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
+		cout << "	Wspolrzedne poczatkowe: " << "(" << x0(0,0) << ", " << x0(0,1) << ")" << endl;
+		cout << "	Poczatkowa wartosc funkcji: " << ff2T(x0, ud1, ud2) << endl;
+		cout << endl;
+
+		HJ1 = HJ(ff2T, x0, s3, alpha, epsilon, Nmax, ud1, ud2);
+		cout << "	Wspolrzedne koncowe: " << "(" << HJ1.x << ")" << endl;
+		cout << "	Koncowa wartosc funkcji: " << HJ1.y << endl;
+		if ( HJ1.y < 0.01 && HJ1.y > -0.01){
+			cout << "	Minimum globalne" << endl;
+		}
+		else {
+			cout << "	Minimum lokalne" << endl;
+		}
+		cout << "f_calls = " << solution::f_calls << endl;
+		cout << endl;
+	}
 }
 
 void lab3()
