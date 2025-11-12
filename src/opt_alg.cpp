@@ -228,60 +228,38 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
-		solution X, XB, Xold;
-
-		XB.x = x0;
-		XB.y = ff(x0, ud1, ud2);
-		solution::f_calls++;
-
-		int fcalls = 1;
-
-		do
-		{
-			X = HJ_trial(ff, XB, s, ud1, ud2);
-			fcalls += (int)X.f_calls;
-
-			if (X.y(0, 0) < XB.y(0, 0))
-			{
-				do
-				{
-					Xold = XB;
+		Xopt.clear_calls();
+		solution XB, XB_temp, X(x0);
+		do {
+			XB.x = X.x;
+			XB.fit_fun(ff);
+			X = HJ_trial(ff, XB, s);
+			if (X.y < XB.y) {
+				do {
+					XB_temp = XB;
 					XB = X;
-
-					//ruch wzorcowy
-					X.x = 2 * XB.x - Xold.x;
-					X.y = ff(X.x, ud1, ud2);
-					solution::f_calls++;
-					fcalls++;
-
-					//sprawdzamy wokół nowego punktu
-					X = HJ_trial(ff, X, s, ud1, ud2);
-					fcalls++;
-
-					if (fcalls > Nmax)
-					{
-						XB.flag = -1; // jak przekroczono limit
-						return XB;
+					X.x = 2 * XB.x - XB_temp.x;
+					X.fit_fun(ff);
+					X = HJ_trial(ff, X, s);
+					if (X.f_calls > Nmax) {
+						Xopt.flag = 0;
+						return Xopt;
 					}
-				} while (X.y(0, 0) < XB.y(0, 0));
-
-				X = XB; // cofnięcie do najlepszego punktu
+				} while (X.y < XB.y);
+				X = XB;
 			}
-			else
-			{
-				s *= alpha; // zmniejszenie kroku
+			else {
+				s = alpha * s;
 			}
-
-			if (fcalls > Nmax)
-			{
-				XB.flag = -1;
-				return XB;
+			if (X.f_calls > Nmax) {
+				Xopt.flag = 0;
+				return Xopt;
 			}
-
 		} while (s > epsilon);
 
-		XB.flag = 1; // sukces
-		Xopt = XB;
+		Xopt.x = XB.x;
+		Xopt.y = XB.y;
+		Xopt.flag = 1;
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -294,38 +272,27 @@ solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, ma
 {
 	try
 	{
-		//Tu wpisz kod funkcji
-		int n = 2; 				//liczba współrzędnych
-		matrix X_try = XB.x;
-		matrix Y_try;
-		
-		for (int j = 0; j < n; j++){	//j to aktualna współrzędna czyli 0 = poziom, 1 = pion
-			// dla +s
-			X_try = XB.x;
-			X_try(0, j) += s;
-			Y_try = ff(X_try, ud1, ud2);
-			XB.f_calls++;
-
-			if(Y_try < XB.y(0,0)){
-				XB.x = X_try;
-				XB.y = Y_try;
-			} 
+		//Tu wpisz kod 
+		solution X;
+		int n = get_len(XB.x);
+		matrix E(n, n);
+		for (int j = 0; j < n; j++) {
+			E(j, j) = 1.0;
+		}
+		for (int j = 0; j < n; j++) {
+			X.x = XB.x + (s * E[j]);
+			X.fit_fun(ff);
+			if (X.y < XB.y) {
+				XB = X;
+			}
 			else {
-
-				// dla -s
-				X_try = XB.x; // reset
-				X_try(0, j) -= s;
-				Y_try = ff(X_try, ud1, ud2);
-				XB.f_calls++;
-				
-				if(Y_try < XB.y(0,0)){
-					XB.x = X_try;
-					XB.y = Y_try;
+				X.x = XB.x - (s * E[j]);
+				X.fit_fun(ff);
+				if (X.y < XB.y) {
+					XB = X;
 				}
 			}
-
 		}
-
 		return XB;
 	}
 	catch (string ex_info)
@@ -338,16 +305,92 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 {
 	try
 	{
-		solution Xopt;
 		//Tu wpisz kod funkcji
+		solution::clear_calls();
+		//int i = 0;
+		int n = get_len(x0);
+		matrix d(n, n);
+		for (int j = 0; j < n; j++) {
+			d(j, j) = 1.0;
+		}
+		matrix lamda(n, 1), p(n, 1), s(s0);
+		solution XB, X_temp;
+		XB.x = x0;
+		XB.fit_fun(ff);
 
-		return Xopt;
+		while (true) {
+
+			//zacznijmy szukać rozwiązania zgodnie z zadaną bazą 
+			for (int j = 0; j < n; j++) {
+				X_temp.x = XB.x + (s(j) * d[j]);
+				X_temp.fit_fun(ff);
+				if (X_temp.y(0) < XB.y(0)) {
+					XB = X_temp;
+					lamda(j) += s(j);
+					s(j) *= alpha;
+				}
+				else {
+					p(j) = p(j) + 1;
+					s(j) *= -beta;
+				}
+			}
+
+			//czy któryś z kroków pogorszył sytuacje?
+			bool change = true;
+			for (int j = 0; j < n; j++) {
+				if (p(j) == 0 || lamda(j) == 0)
+				{
+					change = false;
+					break;
+				}
+
+			}
+
+			//zmiana bazy jeżeli jest to konieczne
+			if (change)
+			{
+				matrix Q(n, n), v(n, 1);
+				for (int i = 0; i < n; ++i)
+					for (int j = 0; j <= i; ++j)
+						Q(i, j) = lamda(i);
+
+				Q = d * Q;
+				v = Q[0] / norm(Q[0]);
+				d.set_col(v, 0);
+				for (int i = 1; i < n; ++i)
+				{
+					matrix temp(n, 1);
+					for (int j = 0; j < i; ++j)
+						temp = temp + (trans(Q[i]) * d[j]) * d[j];
+					v = Q[i] - temp;
+					d.set_col(v, i);
+				}
+				s = s0;
+				lamda = matrix(n, 1);
+				p = matrix(n, 1);
+			}
+
+			//czy wynik jest wystarczająco dokładny?
+			double max_s = abs(s(0));
+			for (int i = 1; i < n; ++i) {
+				if (max_s < abs(s(i))) {
+					max_s = abs(s(i));
+				}
+			}
+			if (max_s < epsilon || solution::f_calls > Nmax) {
+				return XB;
+			}
+		}
+		
+
 	}
 	catch (string ex_info)
 	{
 		throw ("solution Rosen(...):\n" + ex_info);
 	}
 }
+
+
 
 solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {

@@ -236,83 +236,88 @@ void lab2()
 	// koniec testów
 */
 	// testowa funkcja celu
-	solution::clear_calls();
-	matrix x0 = matrix(1, 2, 0.0);
-	matrix ud1, ud2;
-	double s1, s2, s3;
-	double alpha = 0.6;
-	double epsilon = 1e-5;
-	double Nmax = 1000;
-	solution HJ1;
+	srand(time(NULL));
+	std::ofstream Sout("symulacja_lab2_testowa.csv");
 
-	s1 = 1.24;
-	for (int i = 0; i < 100; i++){
-		solution::clear_calls();
-		cout << "Optymalizacja nr " << i + 1 << endl;
-		x0(0, 0) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
-		x0(0, 1) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
-		cout << "	Wspolrzedne poczatkowe: " << "(" << x0(0,0) << ", " << x0(0,1) << ")" << endl;
-		cout << "	Poczatkowa wartosc funkcji: " << ff2T(x0, ud1, ud2) << endl;
-		cout << endl;
+	matrix X;
+	double step = 0.01, alpha = 0.8, beta = 0.1, epsilon = 0.0001;
+	double a, b;
+	int Nmax = 1000;
 
-		HJ1 = HJ(ff2T, x0, s1, alpha, epsilon, Nmax, ud1, ud2);
-		cout << "	Wspolrzedne koncowe: " << "(" << HJ1.x << ")" << endl;
-		cout << "	Koncowa wartosc funkcji: " << HJ1.y << endl;
-		if ( HJ1.y < 0.01 && HJ1.y > -0.01){
-			cout << "	Minimum globalne" << endl;
-		}
-		else {
-			cout << "	Minimum lokalne" << endl;
-		}
-		cout << "f_calls = " << solution::f_calls << endl;
-		cout << endl;
+	// zadanie teoretyczne
+
+	for (int i = 0; i < 100; i++)
+	{
+		a = ((rand() % 200) / 100.0) - 1;
+		b = ((rand() % 200) / 100.0) - 1;
+		alpha = 0.8;
+		X = matrix(2, new double[2] {a, b});
+		solution hooke = HJ(ff2T, X, step, alpha, epsilon, Nmax);
+		Sout << "x" << a << ";" << "x" << b << ";" << "x" << hooke.x(0) << ";" << "x" << hooke.x(1) << ";" << "x" << hooke.y << ";" << "x" << solution::f_calls << ";";
+		cout << hooke;
+
+		
+		alpha = 1.8;
+		matrix Step = matrix(2, new double[2] { step, step});
+		solution rosen = Rosen(ff2T, X, Step, alpha, beta, epsilon, Nmax);
+		Sout << "x" << rosen.x(0) << ";" << "x" << rosen.x(1) << ";" << "x" << rosen.y << ";" << "x" << solution::f_calls << "\n";
+		cout << rosen;
 	}
 
-	s2 = 0.76;
-	for (int i = 0; i < 100; i++){
-		solution::clear_calls();
-		cout << "Optymalizacja nr " << i + 1 << endl;
-		x0(0, 0) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
-		x0(0, 1) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
-		cout << "	Wspolrzedne poczatkowe: " << "(" << x0(0,0) << ", " << x0(0,1) << ")" << endl;
-		cout << "	Poczatkowa wartosc funkcji: " << ff2T(x0, ud1, ud2) << endl;
-		cout << endl;
+	//problem rzeczywisty
 
-		HJ1 = HJ(ff2T, x0, s2, alpha, epsilon, Nmax, ud1, ud2);
-		cout << "	Wspolrzedne koncowe: " << "(" << HJ1.x << ")" << endl;
-		cout << "	Koncowa wartosc funkcji: " << HJ1.y << endl;
-		if ( HJ1.y < 0.01 && HJ1.y > -0.01){
-			cout << "	Minimum globalne" << endl;
-		}
-		else {
-			cout << "	Minimum lokalne" << endl;
-		}
-		cout << "f_calls = " << solution::f_calls << endl;
-		cout << endl;
+	//sprawdzenie poprawnosci
+	matrix x(2, 1, 5); // macierz 2x1 wypelniona wartoscia 5
+	cout << ff2R(x);
+	X = matrix(2, new double[2] {5, 5});
+	solution wynikHJ = HJ(ff2R, X, step, alpha, epsilon, Nmax);
+	//cout << wynikHJ;
+
+	alpha = 1.8;
+	matrix Step = matrix(2, new double[2] { step, step});
+	solution wynikR = Rosen(ff2R, X, Step, alpha, beta, epsilon, Nmax);
+	//cout << wynikR;
+
+	//symulacja 
+
+	double t0 = 0.0;
+	double tend = 100.0;
+	double dt = 0.1;
+
+	// Initial conditions for the state vector Y
+	matrix Y0(2, 1); 
+	Y0(0) = 0.0;     
+	Y0(1) = 0.0;     
+
+	// Reference values for the desired angle and angular velocity
+	matrix ud3(2, 1);
+	ud3(0) = 3.14;   
+	ud3(1) = 0.0;    
+
+	// Gain parameters, k1 and k2, within the range [0, 10]
+	matrix ud4(2, 1);
+	//ud4(0) = wynikHJ.x(0);     
+	ud4(0) = wynikR.x(0);     
+	//ud4(1) = wynikHJ.x(1);     
+	ud4(1) = wynikR.x(1);     
+
+	matrix* result = solve_ode(df2, t0, dt, tend, Y0, ud3, ud4);
+
+	int n = get_len(result[0]);
+	std::cout << "Time\tAngle\tAngular Velocity" << std::endl;
+	for (int i = 0; i < n; i++) {
+		std::cout << result[0](i) << "\t"      
+			<< result[1](i, 0) << "\t"  
+			<< result[1](i, 1) << std::endl; 
 	}
 
-	s3 = 0.32;
-	for (int i = 0; i < 100; i++){
-		solution::clear_calls();
-		cout << "Optymalizacja nr " << i + 1 << endl;
-		x0(0, 0) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
-		x0(0, 1) = (double)rand() / RAND_MAX * 2.0f - 1.0f;
-		cout << "	Wspolrzedne poczatkowe: " << "(" << x0(0,0) << ", " << x0(0,1) << ")" << endl;
-		cout << "	Poczatkowa wartosc funkcji: " << ff2T(x0, ud1, ud2) << endl;
-		cout << endl;
-
-		HJ1 = HJ(ff2T, x0, s3, alpha, epsilon, Nmax, ud1, ud2);
-		cout << "	Wspolrzedne koncowe: " << "(" << HJ1.x << ")" << endl;
-		cout << "	Koncowa wartosc funkcji: " << HJ1.y << endl;
-		if ( HJ1.y < 0.01 && HJ1.y > -0.01){
-			cout << "	Minimum globalne" << endl;
-		}
-		else {
-			cout << "	Minimum lokalne" << endl;
-		}
-		cout << "f_calls = " << solution::f_calls << endl;
-		cout << endl;
+	std::ofstream file("symulacja_lab2_rzeczywisty.csv");
+	file << "Czas;Kat;Predkosc katowa\n";
+	for (int i = 0; i < n; ++i) {
+		file << result[0](i) << "x;" << result[1](i, 0) << "x;" << result[1](i, 1) << "x\n";
 	}
+	file.close();
+
 }
 
 void lab3()
