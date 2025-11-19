@@ -229,19 +229,19 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 		solution Xopt;
 		//Tu wpisz kod funkcji
 		Xopt.clear_calls();
-		solution XB, XB_temp, X(x0);
+		solution XB, tmp, X(x0);
 		do {
 			XB.x = X.x;
 			XB.fit_fun(ff);
-			X = HJ_trial(ff, XB, s);
+			X = HJ_probuj(ff, XB, s);
 			if (X.y < XB.y) {
 				do {
-					XB_temp = XB;
+					tmp = XB;
 					XB = X;
-					X.x = 2 * XB.x - XB_temp.x;
+					X.x = 2 * XB.x - tmp.x;
 					X.fit_fun(ff);
-					X = HJ_trial(ff, X, s);
-					if (X.f_calls > Nmax) {
+					X = HJ_probuj(ff, X, s);
+					if (solution::f_calls > Nmax) {
 						Xopt.flag = 0;
 						return Xopt;
 					}
@@ -251,7 +251,7 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 			else {
 				s = alpha * s;
 			}
-			if (X.f_calls > Nmax) {
+			if (solution::f_calls > Nmax) {
 				Xopt.flag = 0;
 				return Xopt;
 			}
@@ -268,7 +268,7 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 	}
 }
 
-solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, matrix ud1, matrix ud2)
+solution HJ_probuj(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, matrix ud1, matrix ud2)
 {
 	try
 	{
@@ -276,17 +276,17 @@ solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, ma
 		solution X;
 		int n = get_len(XB.x);
 		matrix E(n, n);
-		for (int j = 0; j < n; j++) {
-			E(j, j) = 1.0;
+		for (int i = 0; i < n; i++) {
+			E(i, i) = 1.0;
 		}
-		for (int j = 0; j < n; j++) {
-			X.x = XB.x + (s * E[j]);
+		for (int i = 0; i < n; i++) {
+			X.x = XB.x + (s * E[i]);
 			X.fit_fun(ff);
 			if (X.y < XB.y) {
 				XB = X;
 			}
 			else {
-				X.x = XB.x - (s * E[j]);
+				X.x = XB.x - (s * E[i]);
 				X.fit_fun(ff);
 				if (X.y < XB.y) {
 					XB = X;
@@ -307,52 +307,45 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	{
 		//Tu wpisz kod funkcji
 		solution::clear_calls();
-		//int i = 0;
 		int n = get_len(x0);
 		matrix d(n, n);
-		for (int j = 0; j < n; j++) {
-			d(j, j) = 1.0;
+		for (int i = 0; i < n; i++) {
+			d(i, i) = 1.0;
 		}
-		matrix lamda(n, 1), p(n, 1), s(s0);
+		matrix lambda(n, 1), p(n, 1), s(s0);
 		solution XB, X_temp;
 		XB.x = x0;
 		XB.fit_fun(ff);
 
 		while (true) {
-
-			//zacznijmy szukać rozwiązania zgodnie z zadaną bazą 
-			for (int j = 0; j < n; j++) {
-				X_temp.x = XB.x + (s(j) * d[j]);
+			for (int i = 0; i < n; i++) {
+				X_temp.x = XB.x + (s(i) * d[i]);
 				X_temp.fit_fun(ff);
 				if (X_temp.y(0) < XB.y(0)) {
 					XB = X_temp;
-					lamda(j) += s(j);
-					s(j) *= alpha;
+					lambda(i) += s(i);
+					s(i) *= alpha;
 				}
 				else {
-					p(j) = p(j) + 1;
-					s(j) *= -beta;
+					p(i) = p(i) + 1;
+					s(i) *= -beta;
 				}
 			}
-
-			//czy któryś z kroków pogorszył sytuacje?
 			bool change = true;
-			for (int j = 0; j < n; j++) {
-				if (p(j) == 0 || lamda(j) == 0)
+			for (int i = 0; i < n; i++) {
+				if (p(i) == 0 || lambda(i) == 0)
 				{
 					change = false;
 					break;
 				}
 
 			}
-
-			//zmiana bazy jeżeli jest to konieczne
 			if (change)
 			{
 				matrix Q(n, n), v(n, 1);
 				for (int i = 0; i < n; ++i)
 					for (int j = 0; j <= i; ++j)
-						Q(i, j) = lamda(i);
+						Q(i, j) = lambda(i);
 
 				Q = d * Q;
 				v = Q[0] / norm(Q[0]);
@@ -366,11 +359,9 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 					d.set_col(v, i);
 				}
 				s = s0;
-				lamda = matrix(n, 1);
+				lambda = matrix(n, 1);
 				p = matrix(n, 1);
 			}
-
-			//czy wynik jest wystarczająco dokładny?
 			double max_s = abs(s(0));
 			for (int i = 1; i < n; ++i) {
 				if (max_s < abs(s(i))) {
@@ -381,8 +372,6 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				return XB;
 			}
 		}
-		
-
 	}
 	catch (string ex_info)
 	{
