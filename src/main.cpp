@@ -193,60 +193,60 @@ void lab1()
 
 void lab2()
 {
-/*
+
 	// testy
-	matrix x = matrix(1, 2, 0.0);
-	double x_1 = -1.0;				//pierwsza współrzędna (oś x)
-	double x_2 = 0.5;				//druga współrzędna (oś y)
-	x(0, 0) = x_1;
-	x(0, 1) = x_2;
+	// matrix x = matrix(1, 2, 0.0);
+	// double x_1 = -1.0;				//pierwsza współrzędna (oś x)
+	// double x_2 = 0.5;				//druga współrzędna (oś y)
+	// x(0, 0) = x_1;
+	// x(0, 1) = x_2;
 
-	cout << "x = " << x << endl;
-	cout << "f(x) = " << ff2T(x, matrix(), matrix()) << endl;
+	// //cout << "x = " << x << endl;
+	// //cout << "f(x) = " << ff2T(x, matrix(), matrix()) << endl;
 
-	double testS = 0.2;				//testowy krok
-	matrix ud1, ud2; //puste
+	// double testS = 0.2;				//testowy krok
+	// matrix ud1, ud2; //puste
 
-	solution xb;					//x początkowy (z dwoma współrzędnymi i wartoscia)
-	xb.x = x;
-	xb.y = ff2T(x, ud1, ud2);
+	// solution xb;					//x początkowy (z dwoma współrzędnymi i wartoscia)
+	// xb.x = x;
+	// xb.y = ff2T(x, ud1, ud2);
 
-	solution testHJ_trial;
-	testHJ_trial = HJ_trial(ff2T, xb, testS, ud1, ud2);
+	// solution testHJ_trial;
+	// testHJ_trial = HJ_probuj(ff2T, xb, testS, ud1, ud2);
 
-	cout << "\nWynik HJ_trial:" << endl;
-	cout << "x = " << testHJ_trial.x << endl;
-	cout << "y = " << testHJ_trial.y << endl;
-	cout << "f_calls = " << solution::f_calls << endl;
+	// cout << "\nWynik HJ_trial:" << endl;
+	// cout << "x = " << testHJ_trial.x << endl;
+	// cout << "y = " << testHJ_trial.y << endl;
+	// cout << "f_calls = " << solution::f_calls << endl;
 
 
-	solution::clear_calls();
-	matrix x0 = matrix(1, 2, 0.0);
-	x0(0, 0) = -1.0;		//dla tych danych wpada w min lokalne, nie globalne
-	x0(0, 1) = 0.5;
-	double testAlpha = 0.2;
-	double testEpsilon = 1e-5;
-	double testNmax = 100;
-	solution testHJ;
-	testHJ = HJ(ff2T, x0, testS, testAlpha, testEpsilon, testNmax, ud1, ud2);
-	cout << "\nWynik HJ:" << endl;
-	cout << "x = " << testHJ.x << endl;
-	cout << "y = " << testHJ.y << endl;
-	cout << "f_calls = " << solution::f_calls << endl;
+	// solution::clear_calls();
+	// matrix x0 = matrix(1, 2, 0.0);
+	// x0(0, 0) = -1.0;		//dla tych danych wpada w min lokalne, nie globalne
+	// x0(0, 1) = 0.5;
+	// double testAlpha = 0.2;
+	// double testEpsilon = 1e-5;
+	// double testNmax = 100;
+	// solution testHJ;
+	// testHJ = HJ(ff2T, x0, testS, testAlpha, testEpsilon, testNmax, ud1, ud2);
+	// cout << "\nWynik HJ:" << endl;
+	// cout << "x = " << testHJ.x << endl;
+	// cout << "y = " << testHJ.y << endl;
+	// cout << "f_calls = " << solution::f_calls << endl;
 	// koniec testów
-*/
+
 	// testowa funkcja celu
 	srand(time(NULL));
 	std::ofstream Sout("symulacja_lab2_testowa.csv");
 
 	matrix X;
-	double step = 0.01, alpha = 0.8, beta = 0.1, epsilon = 0.0001;
+	double step = 0.0001, alpha = 0.8, beta = 0.1, epsilon = 0.0001;
 	double a, b;
 	int Nmax = 1000;
 
 	// zadanie teoretyczne
-	Sout << "Lp." <<"x1(0)" << ";" << "x2(0)" << ";" << "x1* (hooke)" << ";" << "x2* (hooke)" << ";" << "y (hooke)" << ";" << "f_calls" << ";" << "x1* (rosen)" << ";" << "x2* (rosen)" << ";" << "y (rosen)" << ";" << "f_calls" << ";";
-	for (int i = 0; i < 100; i++)
+	Sout << "Lp." << ";" <<"x1(0)" << ";" << "x2(0)" << ";" << "x1* (hooke)" << ";" << "x2* (hooke)" << ";" << "y (hooke)" << ";" << "f_calls" << ";" << "x1* (rosen)" << ";" << "x2* (rosen)" << ";" << "y (rosen)" << ";" << "f_calls" << ";";
+	for (int i = 1; i <= 100; i++)
 	{
 		a = ((rand() % 200) / 100.0) - 1;
 		b = ((rand() % 200) / 100.0) - 1;
@@ -254,14 +254,14 @@ void lab2()
 		X = matrix(2, new double[2] {a, b});
 		solution hooke = HJ(ff2T, X, step, alpha, epsilon, Nmax);
 		Sout << i << ";" << a << ";" << b << ";" <<hooke.x(0) << ";" << hooke.x(1) << ";" << hooke.y << ";" << solution::f_calls << ";";
-		cout << hooke;
+		//cout << hooke;
 
 		
 		alpha = 1.8;
 		matrix Step = matrix(2, new double[2] { step, step});
 		solution rosen = Rosen(ff2T, X, Step, alpha, beta, epsilon, Nmax);
 		Sout << rosen.x(0) << ";" << rosen.x(1) << ";"<< rosen.y << ";" << solution::f_calls << "\n";
-		cout << rosen;
+		//cout << rosen;
 	}
 
 	//problem rzeczywisty
@@ -270,12 +270,12 @@ void lab2()
 	cout << ff2R(x);
 	X = matrix(2, new double[2] {5, 5});
 	solution wynikHJ = HJ(ff2R, X, step, alpha, epsilon, Nmax);
-	//cout << wynikHJ;
+	cout << wynikHJ;
 
 	alpha = 1.8;
 	matrix Step = matrix(2, new double[2] { step, step});
 	solution wynikR = Rosen(ff2R, X, Step, alpha, beta, epsilon, Nmax);
-	//cout << wynikR;
+	cout << wynikR;
 
 	//symulacja 
 	double t0 = 0.0;
@@ -291,10 +291,10 @@ void lab2()
 	ud3(1) = 0.0;    
 
 	matrix ud4(2, 1);
-	//ud4(0) = wynikHJ.x(0);     
-	ud4(0) = wynikR.x(0);     
-	//ud4(1) = wynikHJ.x(1);     
-	ud4(1) = wynikR.x(1);     
+	ud4(0) = wynikHJ.x(0);     
+	//ud4(0) = wynikR.x(0);     
+	ud4(1) = wynikHJ.x(1);     
+	//ud4(1) = wynikR.x(1);     
 
 	matrix* result = solve_ode(df2, t0, dt, tend, Y0, ud3, ud4);
 
@@ -309,7 +309,7 @@ void lab2()
 	std::ofstream file("symulacja_lab2_rzeczywisty.csv");
 	file << "Czas;Kat;Predkosc katowa\n";
 	for (int i = 0; i < n; ++i) {
-		file << result[0](i) << "x;" << result[1](i, 0) << "x;" << result[1](i, 1) << "x\n";
+		file << result[0](i) << ";" << result[1](i, 0) << ";" << result[1](i, 1) << "\n";
 	}
 	file.close();
 
