@@ -38,7 +38,8 @@ int main()
 
 		//lab0();
 		//lab1();
-		lab2();
+		//lab2();
+		lab3();
 	}
 	catch (string EX_INFO)
 	{
@@ -194,47 +195,6 @@ void lab1()
 void lab2()
 {
 
-	// testy
-	// matrix x = matrix(1, 2, 0.0);
-	// double x_1 = -1.0;				//pierwsza współrzędna (oś x)
-	// double x_2 = 0.5;				//druga współrzędna (oś y)
-	// x(0, 0) = x_1;
-	// x(0, 1) = x_2;
-
-	// //cout << "x = " << x << endl;
-	// //cout << "f(x) = " << ff2T(x, matrix(), matrix()) << endl;
-
-	// double testS = 0.2;				//testowy krok
-	// matrix ud1, ud2; //puste
-
-	// solution xb;					//x początkowy (z dwoma współrzędnymi i wartoscia)
-	// xb.x = x;
-	// xb.y = ff2T(x, ud1, ud2);
-
-	// solution testHJ_trial;
-	// testHJ_trial = HJ_probuj(ff2T, xb, testS, ud1, ud2);
-
-	// cout << "\nWynik HJ_trial:" << endl;
-	// cout << "x = " << testHJ_trial.x << endl;
-	// cout << "y = " << testHJ_trial.y << endl;
-	// cout << "f_calls = " << solution::f_calls << endl;
-
-
-	// solution::clear_calls();
-	// matrix x0 = matrix(1, 2, 0.0);
-	// x0(0, 0) = -1.0;		//dla tych danych wpada w min lokalne, nie globalne
-	// x0(0, 1) = 0.5;
-	// double testAlpha = 0.2;
-	// double testEpsilon = 1e-5;
-	// double testNmax = 100;
-	// solution testHJ;
-	// testHJ = HJ(ff2T, x0, testS, testAlpha, testEpsilon, testNmax, ud1, ud2);
-	// cout << "\nWynik HJ:" << endl;
-	// cout << "x = " << testHJ.x << endl;
-	// cout << "y = " << testHJ.y << endl;
-	// cout << "f_calls = " << solution::f_calls << endl;
-	// koniec testów
-
 	// testowa funkcja celu
 	srand(time(NULL));
 	std::ofstream Sout("symulacja_lab2_testowa.csv");
@@ -317,7 +277,14 @@ void lab2()
 
 void lab3()
 {
+	// test kodu
+	matrix test(2, 1);
+	test(0) = 6.1;
+	test(1) = 6;
 
+	std::cout << test << '\n';
+	std::cout << ff3T(test) << '\n';
+	// koniec testu kodu
 }
 
 void lab4()

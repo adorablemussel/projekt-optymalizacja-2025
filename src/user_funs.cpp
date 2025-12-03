@@ -139,3 +139,15 @@ matrix df2(double t, matrix Y, matrix ud1, matrix ud2) {
 	dY(1) = (k1 * (alfa_ref - Y(0)) + k2 * (omega_ref - Y(1)) - b * Y(1)) / I;
 	return dY;
 }
+
+matrix ff3T(matrix x, matrix ud1, matrix ud2) {
+	double x1 = x(0);
+	double x2 = x(1);
+
+	double pierwiastek = sqrt( (x1 / PI) * (x1 / PI) +
+                     (x2 / PI) * (x2 / PI) );
+	
+	double result = sin(PI * pierwiastek) / (PI * pierwiastek);			 
+
+	return matrix(1, 1, result);
+}
