@@ -140,14 +140,113 @@ matrix df2(double t, matrix Y, matrix ud1, matrix ud2) {
 	return dY;
 }
 
-matrix ff3T(matrix x, matrix ud1, matrix ud2) {
-	double x1 = x(0);
-	double x2 = x(1);
+matrix ff3T_out(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+	y = (sin(3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)))) / (3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)));
 
-	double pierwiastek = sqrt( (x1 / PI) * (x1 / PI) +
-                     (x2 / PI) * (x2 / PI) );
-	
-	double result = sin(PI * pierwiastek) / (PI * pierwiastek);			 
+	double a = m2d(ud1);
+	double c = m2d(ud2);
 
-	return matrix(1, 1, result);
+	//g1
+	if (-x(0) + 1 > 0)
+		y = y + c * pow(-x(0) + 1, 2);
+	//g2
+	if (-x(1) + 1 > 0)
+		y = y + c * pow(-x(1) + 1, 2);
+	//g3
+	if (norm(x) - a > 0)
+		y = y + c * pow(norm(x) - a, 2);
+
+	return y;
+}
+
+matrix ff3T_in(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+	y = (sin(3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)))) / (3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)));
+
+	double a = m2d(ud1);
+	double c = m2d(ud2);
+
+	//g1
+	if (-x(0) + 1 > 0)
+		y = 1E10;
+	else
+		y = y - c / (-x(0) + 1);
+	//g2
+	if (-x(1) + 1 > 0)
+		y = 1E10;
+	else
+		y = y - c / (-x(1) + 1);
+	//g3
+	if (norm(x) - a > 0)
+		y = 1E10;
+	else
+		y = y - c / (norm(x) - a);
+
+	return y;
+}
+
+matrix ff3R(matrix x, matrix ud1, matrix ud2)
+{
+    matrix y;
+    matrix Y0(4, new double[4] {0.0, x(0), 100.0, 0.0}); 
+    matrix* Y = solve_ode(df3, 0.0, 0.01, 7.0, Y0, ud1, x(1));
+    
+    int n = get_len(Y[0]);
+    int i50 = 0;
+    int i_0 = 0;
+
+    for (int i = 0; i < n; ++i)
+    {
+        if (abs(Y[1](i, 2) - 50.0) < abs(Y[1](i50, 2) - 50.0))
+            i50 = i;
+        if (abs(Y[1](i, 2)) < abs(Y[1](i_0, 2)))
+            i_0 = i;
+    }
+    y = -Y[1](i_0, 0);
+
+    // --- FUNKCJE KARY ---
+    if (abs(x(0)) - 10 > 0)
+        y = y + ud2 * pow(abs(x(0)) - 10, 2);
+    if (abs(x(1)) - 10 > 0) 
+        y = y + ud2 * pow(abs(x(1)) - 10, 2);
+    if (abs(Y[1](i50, 0) - 5.0) - 2.0 > 0)
+        y = y + ud2 * pow(abs(Y[1](i50, 0) - 5.0) - 2.0, 2);
+
+    return y;
+}
+
+matrix df3(double t, matrix Y, matrix ud1, matrix ud2)
+{
+	//Wektor zmian po czasie
+	matrix dY(4, 1);
+
+	//Zmienne dane
+	double x = Y(0);
+	double v_x = Y(1);
+	double y = Y(2);
+	double v_y = Y(3);
+
+	//Dane zadania
+	double C = ud1(0);
+	double rho = ud1(1);
+	double r = ud1(2);
+	double m = ud1(3);
+	double g = ud1(4);
+
+	double s = 3.14 * pow(r, 2);
+
+	double D_x = (1.0 / 2.0) * C * rho * s * v_x * abs(v_x);
+	double D_y = (1.0 / 2.0) * C * rho * s * v_y * abs(v_y);
+	double FM_x = rho * v_y * m2d(ud2) * 3.14 * pow(r, 3);
+	double FM_y = rho * v_x * m2d(ud2) * 3.14 * pow(r, 3);
+
+	dY(0) = v_x;
+	dY(1) = (-D_x - FM_x) / m;
+	dY(2) = v_y;
+	dY(3) = ((-m * g) - D_y - FM_y) / m;
+
+	return dY;
 }

@@ -10,7 +10,16 @@ Data ostatniej modyfikacji: 30.09.2025
 
 #include "../include/opt_alg.h"
 #include <ctime>
+#include <clocale>
 
+class MySeparator : public std::numpunct<char> {
+protected:
+    char do_decimal_point() const override {
+        return ','; // TU ZMIENIASZ: wpisz '.' dla kropki lub ',' dla przecinka
+    }
+};
+
+std::locale my_loc(std::locale(), new MySeparator());
 
 std::string double_to_string_comma(double x, int precision = 6) {
     std::ostringstream oss;
@@ -35,7 +44,9 @@ int main()
 	try
 	{
 		srand((unsigned)time(nullptr));
-
+    	// Narzucamy ją na std::cout
+		std::locale::global(my_loc);
+    	std::cout.imbue(my_loc);
 		//lab0();
 		//lab1();
 		//lab2();
@@ -197,7 +208,7 @@ void lab2()
 
 	// testowa funkcja celu
 	srand(time(NULL));
-	std::ofstream Sout("symulacja_lab2_testowa.csv");
+	std::ofstream Sout("symulacja_lab3_testowa.csv");
 
 	matrix X;
 	double step = 0.0001, alpha = 0.8, beta = 0.1, epsilon = 0.0001;
@@ -259,14 +270,14 @@ void lab2()
 	matrix* result = solve_ode(df2, t0, dt, tend, Y0, ud3, ud4);
 
 	int n = get_len(result[0]);
-	std::cout << "Czas\tKat\tPredkosc katowa" << std::endl;
+	cout << "Czas\tKat\tPredkosc katowa" << endl;
 	for (int i = 0; i < n; i++) {
-		std::cout << result[0](i) << "\t"      
+		cout << result[0](i) << "\t"      
 			<< result[1](i, 0) << "\t"  
-			<< result[1](i, 1) << std::endl; 
+			<< result[1](i, 1) << endl; 
 	}
 
-	std::ofstream file("symulacja_lab2_rzeczywisty.csv");
+	ofstream file("symulacja_lab2_rzeczywisty.csv");
 	file << "Czas;Kat;Predkosc katowa\n";
 	for (int i = 0; i < n; ++i) {
 		file << result[0](i) << ";" << result[1](i, 0) << ";" << result[1](i, 1) << "\n";
@@ -277,14 +288,96 @@ void lab2()
 
 void lab3()
 {
-	// test kodu
-	matrix test(2, 1);
-	test(0) = 6.1;
-	test(1) = 6;
+	srand(time(NULL));
+	// funkcja testowa
+	double epsilon = 1E-3;
+	int Nmax = 10000;
+	double c_in = 100;
+	double dc_in = 0.2;
+	double c_out = 1.0;
+	double dc_out = 1.5;
 
-	std::cout << test << '\n';
-	std::cout << ff3T(test) << '\n';
-	// koniec testu kodu
+	ofstream Sout("symulacja_lab3_testowa.csv");
+	Sout << "x0_1;x0_2;x1_out;x2_out;norm_out;y_out;f_calls_out;x1_in;x2_in;norm_in;y_in;f_calls_in\n";
+	
+	solution testowa;
+	matrix a = matrix(4.0);
+	matrix test_x0{};
+
+	for (int i = 0; i < 3; ++i) {
+		if (i == 0)
+			a = matrix(4.0);
+		else if (i == 1)
+			a = matrix(4.4934);
+		else
+			a = matrix(5.0);
+
+		for (int j = 0; j < 100; ++j) {
+			double x0_1 = 1.5 + (double)rand() / (double)RAND_MAX * (5.5-1.5);
+            double x0_2 = 1.5 + (double)rand() / (double)RAND_MAX * (5.5-1.5);
+
+			test_x0 = matrix(2, new double[2] {x0_1, x0_2});
+			Sout << j+1 <<" ;"
+			<<test_x0(0) << " ;"
+			<< test_x0(1) << " ;";
+
+			// Zewnętrzne rozwiązanie
+			testowa = pen(ff3T_out, test_x0, c_out, dc_out, epsilon, Nmax, a);
+			//cout << testowa;
+			Sout << testowa.x(0)<< " ;"
+			<< testowa.x(1) << " ;"
+			<< sqrt(pow(testowa.x(0), 2) + pow(testowa.x(1), 2))<< " ;"
+			<< testowa.y << " "
+			<< testowa.f_calls << " ;";
+			solution::clear_calls();
+
+			// Wewnętrzne rozwiązanie
+			testowa = pen(ff3T_in, test_x0, c_in, dc_in, epsilon, Nmax, a);
+			//cout << testowa;
+			Sout << testowa.x(0) << " ;" 
+			<< testowa.x(1) << " ;"
+			<< sqrt(pow(testowa.x(0), 2) + pow(testowa.x(1), 2)) << " ;"
+			<< testowa.y << " "
+			<< testowa.f_calls << " \n";
+			solution::clear_calls();
+		}
+	}
+	
+	Sout.close();
+
+	std::ofstream Sout2("symulacja_lab3_rzeczywista.csv");
+	// Nagłówki w pliku CSV
+	Sout2 << "time;x_position;y_position\n";
+
+	//Dane zadania
+	matrix ud1 = matrix(5, new double[5] {
+		0.47, //C
+		1.2, //rho
+		0.12, //r
+		0.6, //m
+		9.81 //g
+});
+
+	//Początkowe wartości szukania minimum
+	matrix x0 = matrix(2, new double[2] {5.0, -5.0});
+	
+	solution opt = pen(ff3R, x0, c_out, dc_out, epsilon, Nmax, ud1);
+	//v0x(0) = 5.0, w(0) = -5.0
+	//v0x*, w*, xend*, fcalls - wynik w cout
+	cout << opt << "\n";
+
+	matrix Y0(4, new double[4] {0.0, opt.x(0), 100, 0});
+	matrix* Y = solve_ode(df3, 0.0, 0.01, 7.0, Y0, ud1, opt.x(1));
+
+	for (int i = 0; i < get_len(Y[0]); ++i) {
+		Sout2 << Y[0](i) << " ;"  // t
+			<< Y[1](i, 0) << " ;"  // x
+			<< Y[1](i, 2) << " \n";  // y
+	}
+	Sout2.close();
+	delete[] Y;
+	
+
 }
 
 void lab4()

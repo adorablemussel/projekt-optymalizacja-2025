@@ -384,10 +384,38 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
 	try {
-		solution Xopt;
-		//Tu wpisz kod funkcji
+		solution XB;
+		XB.x = x0;
+		XB.fit_fun(ff, ud1, ud2);
 
-		return Xopt;
+		solution XT;
+		XT = XB;
+
+		double s = 2.5; //początkowy rozmiar simpleksu
+		double alpha = 1.0; //odbicie
+		double beta = 0.5; //zwężenie
+		double gamma = 2.0; //ekspansja
+		double delta = 0.5; //redukcja
+
+		do
+		{
+			XT.x = XB.x;
+			XT = sym_NM(ff, XB.x, s, alpha, beta, gamma, delta, epsilon, Nmax, ud1, c);
+			c *= dc;
+
+			if (solution::f_calls > Nmax)
+			{
+				XT.flag = 0;
+				throw std::string("Maximum amount of f_calls reached!");
+			}
+
+			if (norm(XT.x - XB.x) < epsilon)
+				break;
+
+			XB = XT;
+		} while (true);
+
+		return XT;
 	}
 	catch (string ex_info)
 	{
@@ -397,17 +425,131 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 
 solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma, double delta, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
-	try
-	{
-		solution Xopt;
-		//Tu wpisz kod funkcji
+    try
+    {
+        // Pobranie wymiaru problemu
+        int dims = get_len(x0);
+        
+        // Inicjalizacja simpleksu (wektora rozwiązań)
+        std::vector<solution> S(dims + 1);
+        
+        // Punkt startowy
+        S[0].x = x0;
+        S[0].fit_fun(ff, ud1, ud2);
 
-		return Xopt;
-	}
-	catch (string ex_info)
-	{
-		throw ("solution sym_NM(...):\n" + ex_info);
-	}
+        // Generowanie pozostałych wierzchołków simpleksu
+        matrix basis_vector(dims, 1);
+        for (int i = 1; i <= dims; ++i)
+        {
+            basis_vector = 0.0;
+            
+            matrix offset(dims, 1);
+            offset(i - 1, 0) = 1.0; // Ustawienie 1 na przekątnej/pozycji
+
+			// Skalowanie wektora bazowego do długości boku simpleksu
+            S[i].x = S[0].x +  offset * s;
+            S[i].fit_fun(ff, ud1, ud2);
+        }
+
+        // Zmienne indeksów
+        int idx_best = 0;
+        int idx_worst = 0;
+
+        while (true)
+        {
+            // Znalezienie najlepszego i najgorszego punktu
+            idx_best = 0;
+            idx_worst = 0;
+            
+            for (size_t i = 1; i < S.size(); ++i)
+            {
+                if (S[i].y < S[idx_best].y) idx_best = i;
+                if (S[i].y > S[idx_worst].y) idx_worst = i;
+            }
+
+            // Sprawdzenie warunku stopu (rozmiar simpleksu)
+            double max_dist = 0.0;
+            for (const auto& point : S)
+            {
+                double current_dist = norm(S[idx_best].x - point.x);
+                if (current_dist > max_dist) max_dist = current_dist;
+            }
+
+            if (max_dist < epsilon) break;
+            if (solution::f_calls > Nmax)
+            {
+                S[idx_best].flag = 0;
+                throw std::string("Maximum amount of f_calls reached!");
+            }
+
+            // Wyznaczenie środka ciężkości (Centroid)
+            matrix centroid = S[0].x;
+            for(size_t i = 1; i < S.size(); ++i) centroid = centroid + S[i].x;
+            
+            centroid = centroid - S[idx_worst].x;
+            centroid = centroid / (double)(S.size() - 1); // Dzielimy przez n (ilość punktów bez najgorszego)
+            centroid = matrix(dims, 1); // Zerowanie
+            for(size_t i=0; i<S.size(); ++i) {
+                if(i != idx_worst) centroid = centroid + S[i].x;
+            }
+            centroid = centroid / (double)S.size();
+
+
+            // Odbicie
+            solution P_refl;
+            P_refl.x = centroid + alpha * (centroid - S[idx_worst].x);
+            P_refl.fit_fun(ff, ud1, ud2);
+
+            if (P_refl.y < S[idx_best].y)
+            {
+                // Ekspansja
+                solution P_exp;
+                P_exp.x = centroid + gamma * (P_refl.x - centroid);
+                P_exp.fit_fun(ff, ud1, ud2);
+
+                if (P_exp.y < P_refl.y)
+                    S[idx_worst] = P_exp;
+                else
+                    S[idx_worst] = P_refl;
+            }
+            else
+            {
+                if (S[idx_best].y <= P_refl.y && P_refl.y < S[idx_worst].y)
+                {
+                    // Akceptacja odbicia, brak ekspansji
+                    S[idx_worst] = P_refl;
+                }
+                else
+                {
+                    // Zawężenie
+                    solution P_contr;
+                    P_contr.x = centroid + beta * (S[idx_worst].x - centroid);
+                    P_contr.fit_fun(ff, ud1, ud2);
+
+                    if (P_contr.y >= S[idx_worst].y)
+                    {
+                        // Redukcja globalna
+                        for (size_t i = 0; i < S.size(); ++i)
+                        {
+                            if (i == idx_best) continue;
+                            S[i].x = delta * (S[i].x + S[idx_best].x);
+                            S[i].fit_fun(ff, ud1, ud2);
+                        }
+                    }
+                    else
+                    {
+                        S[idx_worst] = P_contr;
+                    }
+                }
+            }
+        }
+
+        return S[idx_best];
+    }
+    catch (const std::string& msg)
+    {
+        throw "solution sym_NM(...):\n" + msg;
+    }
 }
 
 solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2)
