@@ -50,7 +50,8 @@ int main()
 		//lab0();
 		//lab1();
 		//lab2();
-		lab3();
+		//lab3();
+		lab4();
 	}
 	catch (string EX_INFO)
 	{
@@ -382,6 +383,77 @@ void lab3()
 
 void lab4()
 {
+	srand(time(NULL));
+
+    double epsilon = 1e-2;
+    int Nmax = 10000;
+    double h = 0.25;
+
+    ofstream Sout("wyniki_optymalizacji.csv");
+
+    Sout <<
+        "Lp;x0_1;x0_2;"
+        "SD_x1;SD_x2;SD_y;SD_f_calls;SD_g_calls;SD_global;"
+        "CG_x1;CG_x2;CG_y;CG_f_calls;CG_g_calls;CG_global;"
+        "N_x1;N_x2;N_y;N_f_calls;N_g_calls;N_H_calls;N_global\n";
+
+    for (int i = 0; i < 1; ++i)
+    {
+        // losowy punkt startowy
+        double x0_1 = -5.0 + (double)rand() / RAND_MAX * 10.0;
+        double x0_2 = -5.0 + (double)rand() / RAND_MAX * 10.0;
+
+        matrix x0(2, new double[2]{x0_1, x0_2});
+
+        Sout << i + 1 << ";"
+             << x0_1 << ";"
+             << x0_2 << ";";
+
+        // =====================
+        // Metoda najszybszego spadku
+        // =====================
+        solution sol_SD = SD(ff4T, gf4T, x0, h, epsilon, Nmax);
+
+        Sout << sol_SD.x(0) << ";"
+             << sol_SD.x(1) << ";"
+             << sol_SD.y(0) << ";"
+             << sol_SD.f_calls << ";"
+             << sol_SD.g_calls << ";"
+             << ((sol_SD.flag == 0) ? "TAK" : "NIE") << ";";
+
+        solution::clear_calls();
+
+        // =====================
+        // Gradienty sprzężone
+        // =====================
+        solution sol_CG = CG(ff4T, gf4T, x0, h, epsilon, Nmax);
+
+        Sout << sol_CG.x(0) << ";"
+             << sol_CG.x(1) << ";"
+             << sol_CG.y(0) << ";"
+             << sol_CG.f_calls << ";"
+             << sol_CG.g_calls << ";"
+             << ((sol_CG.flag == 0) ? "TAK" : "NIE") << ";";
+
+        solution::clear_calls();
+
+        // =====================
+        // Metoda Newtona
+        // =====================
+        solution sol_N = Newton(ff4T, gf4T, Hf4T, x0, h, epsilon, Nmax);
+
+        Sout << sol_N.x(0) << ";"
+             << sol_N.x(1) << ";"
+             << sol_N.y(0) << ";"
+             << sol_N.f_calls << ";"
+             << sol_N.g_calls << ";"
+             << sol_N.H_calls << ";"
+             << ((sol_N.flag == 0) ? "TAK" : "NIE") << "\n";
+
+        solution::clear_calls();
+    }
+
+    Sout.close();
 
 }
 

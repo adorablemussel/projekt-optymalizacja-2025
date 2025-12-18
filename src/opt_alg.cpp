@@ -558,7 +558,37 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		Xopt.x = x0;
+        // pomocnicze zmienne
+        matrix x_prev;
+        matrix d;
+        matrix g;
 
+        while (true)
+        {
+            // zapamiętaj poprzedni punkt
+            x_prev = Xopt.x;
+            // sprawdzenie limitu wywołań funkcji
+            if (Xopt.f_calls >= Nmax)
+                throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+
+            // gradient w aktualnym punkcie
+            g = Xopt.grad(gf, ud1, ud2);
+
+            // kierunek najszybszego spadku
+            d = (-1.0) * g;
+
+            // aktualizacja punktu
+            Xopt.x = Xopt.x + h0 * d;
+
+			Xopt.fit_fun(ff, ud1, ud2);
+
+            // sprawdzenie warunku stopu
+            if (norm(Xopt.x - x_prev) < epsilon)
+                break;
+        }
+
+        Xopt.flag = 0;
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -573,6 +603,49 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		 // punkt startowy
+        Xopt.x = x0;
+
+        matrix x_prev;
+        matrix g_prev;
+        matrix g_curr;
+        matrix d;
+
+        // gradient początkowy
+        g_curr = Xopt.grad(gf, ud1, ud2);
+
+        // kierunek początkowy
+        d = (-1.0) * g_curr;
+
+        while (true)
+        {
+            x_prev = Xopt.x;
+            g_prev = g_curr;
+            // kontrola liczby wywołań funkcji
+            if (Xopt.f_calls >= Nmax)
+                throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+
+            // krok
+            Xopt.x = Xopt.x + h0 * d;
+			Xopt.fit_fun(ff, ud1, ud2);
+
+            // nowy gradient
+            g_curr = Xopt.grad(gf, ud1, ud2);
+
+            // współczynnik beta (Fletcher–Reeves)
+            double beta =
+                pow(norm(g_curr), 2.0) /
+                pow(norm(g_prev), 2.0);
+
+            // nowy kierunek
+            d = (-1.0) * g_curr + beta * d;
+
+            // warunek stopu
+            if (norm(Xopt.x - x_prev) < epsilon)
+                break;
+        }
+
+        Xopt.flag = 0;
 
 		return Xopt;
 	}
@@ -589,7 +662,43 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		// punkt startowy
+        Xopt.x = x0;
 
+        matrix x_prev;
+        matrix g;
+        matrix H;
+        matrix d;
+
+        while (true)
+        {
+            // zapamiętaj poprzedni punkt
+            x_prev = Xopt.x;
+
+            // kontrola liczby wywołań funkcji
+            if (Xopt.f_calls >= Nmax)
+                throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+
+            // gradient
+            g = Xopt.grad(gf, ud1, ud2);
+
+            // hesjan
+            H = Xopt.hess(Hf, ud1, ud2);
+
+            // kierunek Newtona: d = - H^{-1} * g
+            d = (-1.0) * (inv(H) * g);
+
+            // aktualizacja punktu
+            Xopt.x = Xopt.x + h0 * d;
+			Xopt.fit_fun(ff, ud1, ud2);
+
+
+            // warunek stopu
+            if (norm(Xopt.x - x_prev) < epsilon)
+                break;
+        }
+
+        Xopt.flag = 0;
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -604,6 +713,55 @@ solution golden(matrix(*ff)(matrix, matrix, matrix), double a, double b, double 
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		const double alpha = (sqrt(5.0) - 1.0) / 2.0;
+
+        double a_i = a;
+        double b_i = b;
+
+        double c = b_i - alpha * (b_i - a_i);
+        double d = a_i + alpha * (b_i - a_i);
+
+        int i = 0;
+
+        Xopt.x = matrix(1, 1, c);
+        matrix fc = Xopt.fit_fun(ff, ud1, ud2);
+
+        Xopt.x = matrix(1, 1, d);
+        matrix fd = Xopt.fit_fun(ff, ud1, ud2);
+
+		while ((b_i - a_i) > epsilon)
+        {
+            if (Xopt.f_calls >= Nmax)
+                throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+
+            if (fc(0) < fd(0))
+            {
+                b_i = d;
+                d = c;
+                fd = fc;
+
+                c = b_i - alpha * (b_i - a_i);
+                Xopt.x = matrix(1, 1, c);
+                fc = Xopt.fit_fun(ff, ud1, ud2);
+            }
+            else
+            {
+                a_i = c;
+                c = d;
+                fc = fd;
+
+                d = a_i + alpha * (b_i - a_i);
+                Xopt.x = matrix(1, 1, d);
+                fd = Xopt.fit_fun(ff, ud1, ud2);
+            }
+
+            i++;
+        }
+
+        double h_opt = 0.5 * (a_i + b_i);
+
+        Xopt.x = matrix(1, 1, h_opt);
+        Xopt.flag = 0;
 
 		return Xopt;
 	}
