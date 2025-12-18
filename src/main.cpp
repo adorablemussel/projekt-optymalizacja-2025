@@ -385,9 +385,9 @@ void lab4()
 {
 	srand(time(NULL));
 
-    double epsilon = 1e-2;
+    double epsilon = 1e-3;
     int Nmax = 10000;
-    double h = 0.25;
+    double h = 0.05;
 
     ofstream Sout("wyniki_optymalizacji.csv");
 
@@ -397,11 +397,11 @@ void lab4()
         "CG_x1;CG_x2;CG_y;CG_f_calls;CG_g_calls;CG_global;"
         "N_x1;N_x2;N_y;N_f_calls;N_g_calls;N_H_calls;N_global\n";
 
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < 100; ++i)
     {
         // losowy punkt startowy
-        double x0_1 = -5.0 + (double)rand() / RAND_MAX * 10.0;
-        double x0_2 = -5.0 + (double)rand() / RAND_MAX * 10.0;
+        double x0_1 = -2.0 + (double)rand() / RAND_MAX * 4.0;
+		double x0_2 = -2.0 + (double)rand() / RAND_MAX * 4.0;
 
         matrix x0(2, new double[2]{x0_1, x0_2});
 

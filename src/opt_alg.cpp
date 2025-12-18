@@ -570,7 +570,12 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
             x_prev = Xopt.x;
             // sprawdzenie limitu wywołań funkcji
             if (Xopt.f_calls >= Nmax)
-                throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+			{
+                //throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+				Xopt.flag = -1;   // brak zbieżności
+    			return Xopt;
+			}
+
 
             // gradient w aktualnym punkcie
             g = Xopt.grad(gf, ud1, ud2);
@@ -623,7 +628,11 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
             g_prev = g_curr;
             // kontrola liczby wywołań funkcji
             if (Xopt.f_calls >= Nmax)
-                throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+			{
+				//throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+				Xopt.flag = -1;   // brak zbieżności
+    			return Xopt;
+			}
 
             // krok
             Xopt.x = Xopt.x + h0 * d;
@@ -677,7 +686,11 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 
             // kontrola liczby wywołań funkcji
             if (Xopt.f_calls >= Nmax)
-                throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+			{
+				//throw string("Przekroczono maksymalna liczbe wywolan funkcji");
+				Xopt.flag = -1;   // brak zbieżności
+    			return Xopt;
+			}
 
             // gradient
             g = Xopt.grad(gf, ud1, ud2);
