@@ -285,3 +285,42 @@ matrix Hf4T(matrix x, matrix ud1, matrix ud2)
     return H;
 }
 
+double hThetaX(matrix theta, matrix x){
+	return 1.0 / (1.0 + exp(-1.0 * m2d(trans(theta) * x)));
+}
+
+matrix ff4R(matrix theta, matrix ud1, matrix ud2){ //ud1 = X, ud2 = Y
+	matrix y;
+
+	double sum = 0.0;
+	for (int i = 0; i < 100; ++i)
+	{
+		double yi = ud2[i](0); 
+		matrix xi = ud1[i];	
+		sum += yi * log(hThetaX(theta, xi)) + (1.0 - yi) * log(1.0 - hThetaX(theta, xi));
+	}
+
+	y = (-1.0 / 100.0) * sum;
+
+	return y;
+}
+
+matrix gf4R(matrix theta, matrix ud1, matrix ud2){ //ud1 = X, ud2 = Y
+	matrix y(3, 1);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		double sum = 0.0;
+		for (int j = 0; j < 100; ++j)
+		{
+			double yi = ud2[j](0);
+			matrix xi = ud1[j];	
+
+			sum += (hThetaX(theta, xi) - yi) * xi(i);
+		}
+		y(i) = (1.0 / 100.0) * sum;
+	}
+
+	return y;
+}
+

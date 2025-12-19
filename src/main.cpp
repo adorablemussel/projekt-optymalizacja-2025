@@ -9,8 +9,10 @@ Data ostatniej modyfikacji: 30.09.2025
 *********************************************/
 
 #include "../include/opt_alg.h"
+#include "../include/dataMatrix.h"
 #include <ctime>
 #include <clocale>
+
 
 class MySeparator : public std::numpunct<char> {
 protected:
@@ -455,6 +457,59 @@ void lab4()
 
     Sout.close();
 
+	// =============================================================
+    // PROBLEM RZECZYWISTY
+    // =============================================================
+    
+    matrix X = dataMatrix(3, 100, "data/XData.txt");
+    matrix Y = dataMatrix(1, 100, "data/YData.txt");
+
+
+    matrix theta_start(3, new double[3]{0.0, 0.0, 0.0});
+    double steps[] = { 0.01, 0.001, 0.0001 };
+    double epsilon_real = 1e-7; 
+
+    ofstream SoutReal("wyniki_rzeczywiste.csv");
+    SoutReal << "Step;Theta0;Theta1;Theta2;Accuracy;F_calls;G_calls\n";
+    
+    cout << "\n--- PROBLEM RZECZYWISTY ---\n";
+
+    for (double h_step : steps)
+    {
+        solution sol_R = CG(ff4R, gf4R, theta_start, h_step, epsilon_real, Nmax, X, Y);
+        
+        int correct_predictions = 0;
+        for (int i = 0; i < 100; ++i)
+        {
+            matrix xi = X[i]; 
+            double yi = Y(0, i); 
+            
+            double probability = hThetaX(sol_R.x, xi);
+
+            if (round(probability) == yi) {
+                correct_predictions++;
+            }
+        }
+        
+        //do konsoli
+        cout << "Krok: " << h_step 
+             << " | Theta: " << sol_R.x(0) << ", " << sol_R.x(1) << ", " << sol_R.x(2)
+             << " | Skutecznosc: " << correct_predictions << "%" 
+             << " | Iteracje: " << sol_R.f_calls << endl;
+             
+        //do pliku
+        SoutReal << h_step << ";"
+                 << sol_R.x(0) << ";"
+                 << sol_R.x(1) << ";"
+                 << sol_R.x(2) << ";"
+                 << correct_predictions << ";" 
+                 << sol_R.f_calls << ";"
+                 << sol_R.g_calls << "\n";
+
+        solution::clear_calls();
+    }
+    
+    SoutReal.close();
 }
 
 void lab5()
