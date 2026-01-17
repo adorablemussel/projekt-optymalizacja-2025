@@ -53,7 +53,8 @@ int main()
 		//lab1();
 		//lab2();
 		//lab3();
-		lab4();
+		//lab4();
+		lab5();
 	}
 	catch (string EX_INFO)
 	{
@@ -514,7 +515,30 @@ void lab4()
 
 void lab5()
 {
+	std::ofstream Sout("symulacja_lab5_rzeczywisty.csv");
+	std::stringstream results;
 
+	double a, epsilon = 0.0001;
+	int Nmax = 1000;
+
+	//rzeczywisty
+		for (double w = 0.0; w <= 1.01; w += 0.01)
+	{
+		matrix ud1(1);
+		ud1(0) = w;
+
+		matrix x0(2, 1);
+		x0(0) = ((rand() % 801) + 200) / 1000.0;		// l <0.2, 1.0> metra
+		x0(1) = ((rand() % 41) + 10) / 1000.0;	// d <0.01, 0.05> metra
+
+		solution result1 = Powell(ff5R, x0, epsilon, Nmax, ud1);
+
+		results << x0(0) << "X ;" << x0(1) << "X ;" << result1.x(0) << "X ;" << result1.x(1) << "X ;" << result1.y(0) << "X ;" << result1.y(1) << "X ;" << solution::f_calls << "\n";
+		solution::clear_calls();
+	}
+	
+	Sout << results.str();
+	Sout.close();
 }
 
 void lab6()

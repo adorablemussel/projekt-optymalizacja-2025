@@ -1,7 +1,7 @@
 #include"../include/user_funs.h"
 
 #define PI 3.141592653589793
-#define E 2.718281828459045
+#define Ex 2.718281828459045
 
 
 matrix ff0T(matrix x, matrix ud1, matrix ud2)				// funkcja celu dla przypadku testowego
@@ -41,7 +41,7 @@ matrix df0(double t, matrix Y, matrix ud1, matrix ud2)
 matrix ff1T(matrix x, matrix ud1, matrix ud2)
 {
 		matrix y;
-		y = -cos(0.1 * x(0)) * pow(E,-(pow((0.1 * x(0) - 2 * PI), 2))) + 0.002 * pow(0.1 * x(0), 2);
+		y = -cos(0.1 * x(0)) * pow(Ex,-(pow((0.1 * x(0) - 2 * PI), 2))) + 0.002 * pow(0.1 * x(0), 2);
 		return y;
 
 }
@@ -324,3 +324,49 @@ matrix gf4R(matrix theta, matrix ud1, matrix ud2){ //ud1 = X, ud2 = Y
 	return y;
 }
 
+matrix ff5R(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+    double P = 2000.0;       //Siła
+    double E = 1.2e11;       //Moduł Younga
+    double ro = 8920.0;      //Gęstość
+    double PI_val = 3.14159265;
+
+    if (isnan(ud2(0, 0))) {
+
+        y = matrix(3, 1);
+
+        y(0) = ro * x(0) * PI_val * pow(x(1), 2) / 4.0;
+        
+        y(1) = (64.0 * P * pow(x(0), 3)) / (3.0 * E * PI_val * pow(x(1), 4));
+        
+        y(2) = (32.0 * P * x(0)) / (PI_val * pow(x(1), 3));
+    }
+    else {
+        matrix yt, xt = ud2[0] + x * ud2[1]; 
+        yt = ff5R(xt, ud1);
+        
+        double min_mass = 0.14;   
+        double max_mass = 18.0;   
+        double min_u = 0.0;
+        double max_u = 0.05; 
+
+        y = ud1 * (yt(0) - min_mass) / (max_mass - min_mass) + 
+            (1.0 - ud1) * (yt(1) - min_u) / (max_u - min_u);
+
+        double c = 1e10;
+
+        if (xt(0) < 0.2)  y = y + c * pow(0.2 - xt(0), 2);
+        if (xt(0) > 1.0)  y = y + c * pow(xt(0) - 1.0, 2);
+        if (xt(1) < 0.01) y = y + c * pow(0.01 - xt(1), 2);
+        if (xt(1) > 0.05) y = y + c * pow(xt(1) - 0.05, 2);
+
+        if (yt(1) > 0.0025) {
+            y = y + c * pow(yt(1) - 0.0025, 2);
+        }
+        if (yt(2) > 300e6) {
+            y = y + c * pow(yt(2) - 300e6, 2);
+        }
+    }
+    return y;
+}

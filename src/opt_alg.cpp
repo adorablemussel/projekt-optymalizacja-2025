@@ -789,7 +789,52 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+
+		int n = get_len(x0);
+		matrix D = ident_mat(n), A(n, 2);
+		solution X, P, h;
+		X.x = x0;
+		double* ab;
+
+		while (true)
+		{
+			P = X;
+
+			for (int i = 0; i < n; ++i)
+			{
+				A.set_col(P.x, 0);
+				A.set_col(D[i], 1);
+				ab = expansion(ff, 0, 1, 1.2, Nmax, ud1, A);
+				h = golden(ff, ab[0], ab[1], epsilon, Nmax, ud1, A);
+				P.x = P.x + h.x * D[i];
+			}
+
+			if (norm(P.x - X.x) < epsilon)
+			{
+				Xopt = X;
+				Xopt.fit_fun(ff, ud1, ud2);
+				Xopt.flag = 0;
+				break;
+			}
+
+			if (solution::f_calls > Nmax)
+			{
+				Xopt = X;
+				Xopt.fit_fun(ff, ud1, ud2);
+				Xopt.flag = 1;
+				break;
+			}
+
+			for (int i = 0; i < n - 1; ++i)
+				D.set_col(D[i + 1], i);
+
+			D.set_col(P.x - X.x, n - 1);
+			A.set_col(P.x, 0);
+			A.set_col(D[n - 1], 1);
+			ab = expansion(ff, 0, 1, 1.2, Nmax, ud1, A);
+			h = golden(ff, ab[0], ab[1], epsilon, Nmax, ud1, A);
+			X.x = P.x + h.x * D[n - 1];
+		}
 
 		return Xopt;
 	}
