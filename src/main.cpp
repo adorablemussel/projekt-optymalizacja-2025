@@ -12,6 +12,7 @@ Data ostatniej modyfikacji: 30.09.2025
 #include "../include/dataMatrix.h"
 #include <ctime>
 #include <clocale>
+#include <fstream>
 
 
 class MySeparator : public std::numpunct<char> {
@@ -31,6 +32,32 @@ std::string double_to_string_comma(double x, int precision = 6) {
         if (c == '.') c = ',';
     }
     return s;
+}
+
+matrix wczytajDane(string filename, int rows, int cols)
+{
+    matrix result = matrix(rows, cols);
+
+    ifstream file(filename);
+    if (!file.is_open()) {
+        throw string("Nie mozna otworzyc pliku: " + filename);
+    }
+
+    int i = 0;
+    std::string line;
+    while (std::getline(file, line))
+    {
+        int j = 0;
+        std::istringstream lineStream(line);
+        std::string value;
+        while (lineStream >> value) {
+            result(i, j) = std::stod(value);
+            ++j;
+        }
+        ++i;
+    }
+	cout<<"przeszlo";
+    return result;
 }
 
 void lab0();
@@ -54,7 +81,8 @@ int main()
 		//lab2();
 		//lab3();
 		//lab4();
-		lab5();
+		//lab5();
+		lab6();
 	}
 	catch (string EX_INFO)
 	{
@@ -571,5 +599,78 @@ void lab5()
 
 void lab6()
 {
+    double sigma_tab[] = { 0.01, 0.1, 1, 10, 100 };
+    int N = 2;
+    int mi = 20;
+    int lambda = 40;
+    double epsilon = 1e-5;
+    int Nmax = 10000;
 
+    matrix lb(N, 1);
+    lb(0) = -5;
+    lb(1) = -5;
+
+    matrix ub(N, 1);
+    ub(0) = 5;
+    ub(1) = 5;
+
+	//teoretyczna
+    std::ofstream Sout1("symulacja_lab6_teoretyczny.csv");
+    
+    Sout1 << "Sigma;i;x1;x2;f(x);Liczba_wywolan" << endl;
+
+    for(double sigmy : sigma_tab)
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            solution result = EA(ff6T, N, lb, ub, mi, lambda, sigmy, epsilon, Nmax);
+            
+            Sout1 << sigmy << ";" 
+                  << (i + 1) << ";" 
+                  << result.x(0) << ";" 
+                  << result.x(1) << ";" 
+                  << result.y(0) << ";" 
+                  << solution::f_calls << endl;
+
+            solution::clear_calls();
+        }
+    }
+    Sout1.close();
+    cout << "Zapisano wyniki teoretyczne do 'symulacja_lab6_teoretyczny.csv'." << endl;
+
+
+    //rzeczywiste
+    matrix data = wczytajDane("polozenia.txt", 1001, 2);
+
+    lb = matrix(2, 1, 0.1);
+    ub = matrix(2, 1, 3);
+
+    cout << "Rozpoczynam optymalizacje problemu rzeczywistego..." << endl;
+    
+    solution result = EA(ff6R, N, lb, ub, mi, lambda, matrix(2, 1, 1), 1e-2, Nmax, 1001, data);
+    solution::clear_calls();
+
+    cout << "Znaleziono parametry b1=" << result.x(0) << ", b2=" << result.x(1) << endl;
+
+    matrix Y0(4, 1);
+    
+    matrix* Y = solve_ode(df6, 0, 0.1, 100, Y0, NAN, result.x);
+
+    std::ofstream Sout("symulacja_lab6_rzeczywisty.csv");
+    
+    Sout << "Czas;x1_sym;x2_sym;x1_exp;x2_exp" << endl;
+
+    int steps = 1001;
+    for (int i = 0; i < steps; i++)
+    {
+        double t = i * 0.1;
+        Sout << t << ";" 
+             << Y[1](i, 0) << ";"
+             << Y[1](i, 2) << ";"
+             << data(i, 0) << ";"
+             << data(i, 1) << endl; 
+    }
+    
+    Sout.close();
+    cout << "Zapisano wyniki symulacji do 'symulacja_lab6_rzeczywisty.csv'." << endl;
 }
