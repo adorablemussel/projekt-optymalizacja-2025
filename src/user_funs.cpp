@@ -397,10 +397,10 @@ matrix ff6T(matrix x, matrix ud1, matrix ud2)
 
 matrix df6(double t, matrix Y, matrix ud1, matrix ud2)
 {
-	double m1 = 1;
-	double m2 = 2;
-	double k1 = 4;
-	double k2 = 5;
+	double m1 = 1.0;
+	double m2 = 2.0;
+	double k1 = 4.0;
+	double k2 = 6.0;
 	double F = 5.0;
 
 	double b1 = ud2(0);

@@ -648,12 +648,11 @@ void lab6()
     cout << "Rozpoczynam optymalizacje problemu rzeczywistego..." << endl;
     
     solution result = EA(ff6R, N, lb, ub, mi, lambda, matrix(2, 1, 1), 1e-2, Nmax, 1001, data);
-    solution::clear_calls();
 
-    cout << "Znaleziono parametry b1=" << result.x(0) << ", b2=" << result.x(1) << endl;
-
+    cout << "Znaleziono parametry b1=" << result.x(0) << ", b2=" << result.x(1) << ", y=" << result.y(0) << "fcalls=" << solution::f_calls << endl;
+	solution::clear_calls();
     matrix Y0(4, 1);
-    
+
     matrix* Y = solve_ode(df6, 0, 0.1, 100, Y0, NAN, result.x);
 
     std::ofstream Sout("symulacja_lab6_rzeczywisty.csv");
